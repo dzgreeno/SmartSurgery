@@ -1,16 +1,15 @@
 <?php
 
-// Vercel read-only filesystem workaround
-putenv('APP_SERVICES_CACHE=/tmp/services.php');
-putenv('APP_PACKAGES_CACHE=/tmp/packages.php');
-putenv('APP_CONFIG_CACHE=/tmp/config.php');
-putenv('APP_ROUTES_CACHE=/tmp/routes.php');
-putenv('APP_EVENTS_CACHE=/tmp/events.php');
-$_ENV['APP_SERVICES_CACHE'] = '/tmp/services.php';
-$_ENV['APP_PACKAGES_CACHE'] = '/tmp/packages.php';
-$_ENV['APP_CONFIG_CACHE'] = '/tmp/config.php';
-$_ENV['APP_ROUTES_CACHE'] = '/tmp/routes.php';
-$_ENV['APP_EVENTS_CACHE'] = '/tmp/events.php';
+// Storage overrides for Vercel
+putenv('VIEW_COMPILED_PATH=/tmp');
+$_ENV['VIEW_COMPILED_PATH'] = '/tmp';
+
+// Optional: Force clear any lingering /tmp caches if the lambda was warm
+foreach (['routes.php', 'config.php', 'services.php', 'packages.php', 'events.php'] as $f) {
+    if (file_exists('/tmp/' . $f)) {
+        @unlink('/tmp/' . $f);
+    }
+}
 
 // Forward Vercel requests to normal index.php
 require __DIR__ . '/../public/index.php';
