@@ -1,7 +1,7 @@
 {
     "version": 2,
     "framework": null,
-    "installCommand": "composer install --no-dev --no-interaction --optimize-autoloader",
+    "installCommand": "echo 'Skipping frontend install'",
     "buildCommand": "echo 'No frontend build required'",
     "functions": {
         "api/index.php": { "runtime": "vercel-php@0.6.2" }
