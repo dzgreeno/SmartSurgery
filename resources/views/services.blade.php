@@ -594,6 +594,15 @@ footer {
     <li><a href="{{ route('about') }}">نبذة عنا</a></li>
     <li><a href="{{ route('contact') }}">اتصل بنا</a></li>
   </ul>
+  <div class="nav-actions">
+    <button class="dark-toggle" id="darkToggle">🌙</button>
+    @if(session('firebase_user'))
+      <a href="{{ route('dashboard') }}" class="nav-login" style="background: var(--teal-mid);">📊 لوحة التحكم</a>
+      <a href="{{ route('logout') }}" class="nav-login" style="background: #ef4444; margin-right: 5px;">🚪 خروج</a>
+    @else
+      <a href="{{ route('login') }}" class="nav-login">🔐 دخول الطاقم</a>
+    @endif
+  </div>
 </nav>
 
 <!-- BREADCRUMB -->

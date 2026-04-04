@@ -440,7 +440,12 @@ footer { background:linear-gradient(135deg,#071e26,#0b3c49); padding:50px 48px 0
   </ul>
   <div class="nav-actions">
     <button class="dark-toggle" id="darkToggle">🌙</button>
-    <a href="{{ route('login') }}" class="nav-login">🔐 دخول الطاقم</a>
+    @if(session('firebase_user'))
+      <a href="{{ route('dashboard') }}" class="nav-login" style="background: var(--teal-mid);">📊 لوحة التحكم</a>
+      <a href="{{ route('logout') }}" class="nav-login" style="background: #ef4444; margin-right: 5px;">🚪 خروج</a>
+    @else
+      <a href="{{ route('login') }}" class="nav-login">🔐 دخول الطاقم</a>
+    @endif
   </div>
 </nav>
 
