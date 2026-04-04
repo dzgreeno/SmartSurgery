@@ -151,13 +151,9 @@ Route::middleware(['firebase'])->group(function () {
         Route::resource('admin/users', FirebaseUserController::class);
 
         // العمليات الجراحية
-        Route::get('/surgeries', function () {
+        Route::get('/admin/system-surgeries', function () {
             return view('admin.surgeries');
         })->name('admin.surgeries');
-        
-        Route::get('/admin/surgeries', function () {
-            return view('admin.surgeries');
-        })->name('admin.surgeries.alt');
 
         // طلبات العمليات
         Route::get('/admin/demands', function () {
