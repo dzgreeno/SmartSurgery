@@ -143,14 +143,21 @@ Route::middleware(['firebase'])->group(function () {
     Route::middleware(['firebase:admin'])->group(function () {
 
         // لوحة التحكم الرئيسية
-        Route::get('/admin', fn() => view('admin.dashboard'))->name('admin.dashboard');
+        Route::get('/admin', function () {
+            return view('admin.dashboard');
+        })->name('admin.dashboard');
 
         // إدارة المستخدمين (CRUD — البيانات تُدار عبر JS + Firebase RTDB)
         Route::resource('admin/users', FirebaseUserController::class);
 
         // العمليات الجراحية
-        Route::get('/surgeries', fn() => view('admin.surgeries'))->name('admin.surgeries');
-        Route::get('/admin/surgeries', fn() => view('admin.surgeries'))->name('admin.surgeries.alt');
+        Route::get('/surgeries', function () {
+            return view('admin.surgeries');
+        })->name('admin.surgeries');
+        
+        Route::get('/admin/surgeries', function () {
+            return view('admin.surgeries');
+        })->name('admin.surgeries.alt');
 
         // طلبات العمليات
         Route::get('/admin/demands', function () {
