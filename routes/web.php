@@ -30,6 +30,9 @@ Route::get('/general-surgery', fn() => view('general-surgery'))->name('general.s
 Route::get('/maternite', fn() => view('maternite'))->name('maternite');
 Route::get('/pregnancy', fn() => view('pregnancy'))->name('pregnancy');
 
+// رابط سحري جافا سكريبت: تهيئة البيانات من المتصفح (لتجنب مشاكل السيرفر)
+Route::get('/seed-js', fn() => view('seed-js'))->name('seed-js');
+
 // رابط سحري لتهيئة قاعدة البيانات بالحسابات التجريبية (للتطوير فقط)
 Route::get('/system-seed-db', function (App\Services\FirebaseService $firebase) {
     $auth = $firebase->getAuth();
