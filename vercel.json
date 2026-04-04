@@ -3,7 +3,7 @@
     "framework": null,
     "buildCommand": "echo 'No frontend build required'",
     "functions": {
-        "api/index.php": { "runtime": "vercel-php@0.6.1" }
+        "api/index.php": { "runtime": "vercel-php@0.6.2" }
     },
     "routes": [
         {
