@@ -475,7 +475,7 @@ footer { background: var(--deep); padding: 50px 50px 24px; }
         </div>
         <div class="mfi-item">
           <span class="mfi-label">طوارئ 24/24</span>
-          <span class="mfi-val">014 25 36 78</span>
+          <span class="mfi-val">014253678</span>
         </div>
       </div>
     </div>
@@ -506,7 +506,7 @@ footer { background: var(--deep); padding: 50px 50px 24px; }
     <div class="footer-col">
       <h4>تواصل معنا</h4>
       <ul>
-        <li><a href="#">📞 014 25 36 78</a></li>
+        <li><a href="#">📞 014253678</a></li>
         <li><a href="#">📍 أولاد جلال، بسكرة</a></li>
         <li><a href="#">⏰ 08:00 – 20:00</a></li>
         <li><a href="#">🚑 طوارئ 24/24</a></li>

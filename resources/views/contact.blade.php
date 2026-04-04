@@ -231,7 +231,7 @@ body.dark .dropdown-menu a:hover { background:rgba(255,255,255,0.05); color:#ffd
 
   <div class="info-item">
     <strong>الهاتف:</strong><br>
-    014 25 36 78
+    014253678
   </div>
 
   <div class="info-item">

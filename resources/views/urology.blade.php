@@ -582,7 +582,7 @@ footer { background:linear-gradient(135deg,#071e26,#0b3c49); padding:50px 48px 0
 <div class="contact-strip">
   <div class="contact-inner">
     <div class="contact-card reveal"><div class="cicon">📍</div><div class="cinfo"><h4>موقعنا</h4><p>أولاد جلال — ولاية بسكرة<br>الجزائر</p></div></div>
-    <div class="contact-card reveal"><div class="cicon">📞</div><div class="cinfo"><h4>اتصل بنا</h4><p>014 25 36 78<br>🚑 طوارئ: متاح 24/24</p></div></div>
+    <div class="contact-card reveal"><div class="cicon">📞</div><div class="cinfo"><h4>اتصل بنا</h4><p>014253678<br>🚑 طوارئ: متاح 24/24</p></div></div>
     <div class="contact-card reveal"><div class="cicon">🕐</div><div class="cinfo"><h4>ساعات العمل</h4><p>الأحد – الخميس: 08:00 – 20:00<br>الطوارئ: 24/24 — 7/7</p></div></div>
   </div>
 </div>
@@ -617,7 +617,7 @@ footer { background:linear-gradient(135deg,#071e26,#0b3c49); padding:50px 48px 0
     <div class="footer-col">
       <h4>معلومات الاتصال</h4>
       <div class="fci"><span class="icon">📍</span><p>أولاد جلال — ولاية بسكرة، الجزائر</p></div>
-      <div class="fci"><span class="icon">📞</span><p>014 25 36 78</p></div>
+      <div class="fci"><span class="icon">📞</span><p>014253678</p></div>
       <div class="fci"><span class="icon">🚑</span><p>الطوارئ: متاح 24/24</p></div>
     </div>
   </div>

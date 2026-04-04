@@ -565,7 +565,7 @@ footer {
     <div class="pulse-dot"></div>
     <span>خدمة الطوارئ متاحة <strong>24/24</strong></span>
   </div>
-  <span>📞 <strong>014 25 36 78</strong> &nbsp;|&nbsp; 📍 أولاد جلال، الجزائر</span>
+  <span>📞 <strong>014253678</strong> &nbsp;|&nbsp; 📍 أولاد جلال، الجزائر</span>
 </div>
 
 <!-- NAVBAR -->
@@ -822,7 +822,7 @@ footer {
           <li>غرف عزل وعلاج متخصصة</li>
           <li>استقبال مباشر دون موعد مسبق</li>
         </ul>
-        <a href="tel:014253678" class="btn-gold">📞 اتصل الآن: 014 25 36 78</a>
+        <a href="tel:014253678" class="btn-gold">📞 اتصل الآن: 014253678</a>
       </div>
       <div class="featured-img">
         <img src="https://i.ibb.co/Y7gJtfSH/project-image-4.jpg" alt="طوارئ">
@@ -897,7 +897,7 @@ footer {
       <h4>تواصل معنا</h4>
       <div class="footer-contact">
         <p>📍 أولاد جلال، ولاية بسكرة</p>
-        <p>📞 014 25 36 78</p>
+        <p>📞 014253678</p>
         <p>🚑 طوارئ: 24/24</p>
         <p>⏰ 08:00 – 20:00</p>
       </div>
