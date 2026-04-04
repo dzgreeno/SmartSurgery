@@ -12,12 +12,19 @@ class FirebaseService
 
     public function __construct()
     {
+        $factory = new Factory();
         $credPath = storage_path('app/firebase.json');
+        $credJson = env('FIREBASE_CREDENTIALS');
 
-        if (file_exists($credPath)) {
-            $this->factory = (new Factory)
-                ->withServiceAccount($credPath);
+        if ($credJson) {
+            // Load from Environment Variable (JSON String)
+            $factory = $factory->withServiceAccount(json_decode($credJson, true));
+        } elseif (file_exists($credPath)) {
+            // Load from Local File (if exists)
+            $factory = $factory->withServiceAccount($credPath);
         }
+
+        $this->factory = $factory;
     }
 
     public function getAuth()
