@@ -18,7 +18,14 @@ class FirebaseService
 
         if ($credJson) {
             // Load from Environment Variable (JSON String)
-            $factory = $factory->withServiceAccount(json_decode($credJson, true));
+            // Trim any accidental whitespace or hidden characters
+            $credJson = trim($credJson);
+            
+            $decoded = json_decode($credJson, true);
+            
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                $factory = $factory->withServiceAccount($decoded);
+            }
         } elseif (file_exists($credPath)) {
             // Load from Local File (if exists)
             $factory = $factory->withServiceAccount($credPath);
