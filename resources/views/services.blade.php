@@ -577,7 +577,7 @@ footer {
       <span class="nav-logo-sub">المؤسسة الاستشفائية</span>
     </div>
   </a>
-  <ul class="nav-links" style="margin-left:auto;margin-right:20px;">
+  <ul class="nav-links">
     <li><a href="{{ route('home') }}">الرئيسية</a></li>
     <li class="dropdown">
       <span class="dropdown-toggle" style="cursor:pointer">قسم الجراحة▾</span>
