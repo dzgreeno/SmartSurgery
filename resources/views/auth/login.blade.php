@@ -164,11 +164,12 @@ body {
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC5OtqME0D8t72QsEERdRXrCCKl0bZqEQk",
   authDomain: "test-ae989.firebaseapp.com",
+  databaseURL: "https://test-ae989-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "test-ae989",
   storageBucket: "test-ae989.firebasestorage.app",
   messagingSenderId: "1083766099812",
@@ -178,7 +179,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = getFirestore(app);
+const db = getDatabase(app);
 
 const loginForm = document.getElementById('login-form');
 const statusMsg = document.getElementById('status-msg');
@@ -199,25 +200,20 @@ loginForm.addEventListener('submit', async (e) => {
   btnIcon.textContent = '⏳';
 
   try {
-    // 1. Pre-check: Is Firestore reachable?
-    try {
-        await fetch('https://firestore.googleapis.com', { mode: 'no-cors', cache: 'no-cache' });
-    } catch(err) {
-        throw new Error('❌ اتصا بك بـ Firestore مقطوع! تأكد من تعطيل مانع الإعلانات (Ad-blocker) أو جرب شبكة أخرى.');
-    }
-
-    // 2. Firebase Auth Sign In
+    // 1. Firebase Auth Sign In
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
     
-    // 3. Fetch User Role from Firestore
-    const docRef = doc(db, "users", user.uid);
-    const docSnap = await getDoc(docRef);
+    btnText.textContent = 'تم التحقق، جاري جلب البيانات...';
+    
+    // 2. Fetch User Role from Realtime Database
+    const userRef = ref(db, 'users/' + user.uid);
+    const snapshot = await get(userRef);
 
-    if (docSnap.exists()) {
-      const userData = docSnap.data();
+    if (snapshot.exists()) {
+      const userData = snapshot.val();
       
-      // 4. Fill Bridge Form and Submit to PHP
+      // 3. Fill Bridge Form and Submit to PHP
       document.getElementById('bridge-uid').value = user.uid;
       document.getElementById('bridge-email').value = user.email;
       document.getElementById('bridge-fname').value = userData.fname || '';
@@ -225,23 +221,22 @@ loginForm.addEventListener('submit', async (e) => {
       document.getElementById('bridge-role').value = userData.role || 'user';
       document.getElementById('bridge-photo').value = userData.urlphoto || '';
       
-      btnText.textContent = 'تم النجاح! جاري الدخول...';
+      btnText.textContent = '✅ تم النجاح! جاري الدخول...';
+      btnIcon.textContent = '🎉';
       document.getElementById('bridge-form').submit();
     } else {
-      throw new Error('❌ عذراً، لم يتم العثور على بيانات هذا المستخدم في Firestore (قاعدة البيانات فارغة).');
+      throw new Error('لم يتم العثور على بيانات المستخدم في قاعدة البيانات. يرجى تشغيل صفحة /seed-js أولاً.');
     }
 
   } catch (error) {
     console.error(error);
     statusMsg.style.display = 'block';
     
-    let message = '❌ حدث خطأ في الدخول: ' + error.message;
+    let message = '❌ ' + error.message;
     if (error.code === 'auth/invalid-credential') message = '❌ البريد الإلكتروني أو كلمة المرور غير صحيحة';
-    else if (error.code === 'auth/user-not-found') message = '❌ لم يتم العثور على مستخدم بنفس البريد';
+    else if (error.code === 'auth/user-not-found') message = '❌ لم يتم العثور على مستخدم بهذا البريد';
     else if (error.code === 'auth/wrong-password') message = '❌ كلمة المرور خاطئة';
-    else if (error.message.includes('offline') || error.message.includes('fetch')) {
-        message = '❌ مشكلة في الشبكة: يرجى تعطيل الـ VPN أو مانع الإعلانات (Ad-blocker) والمحاولة مجدداً.';
-    }
+    else if (error.code === 'auth/too-many-requests') message = '❌ تم حظر الحساب مؤقتاً بسبب محاولات كثيرة. حاول لاحقاً.';
 
     statusMsg.textContent = message;
     btnSubmit.disabled = false;

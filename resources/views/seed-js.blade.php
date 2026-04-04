@@ -15,10 +15,10 @@
     <div class="max-w-2xl w-full bg-slate-800/50 backdrop-blur-xl border border-slate-700 rounded-3xl p-8 shadow-2xl">
         <div class="text-center mb-8">
             <h1 class="text-3xl font-bold mb-2">🚀 محرك بيانات المستشفى الذكي</h1>
-            <p class="text-slate-400">سيقوم هذا المحرك بإنشاء الحسابات التجريبية مباشرة من المتصفح لتجنب مشاكل الأمان في السيرفر.</p>
+            <p class="text-slate-400">سيقوم هذا المحرك بإنشاء الحسابات التجريبية مباشرة من المتصفح باستخدام Realtime Database.</p>
         </div>
 
-        <div id="status-container" class="space-y-3 mb-8 h-48 overflow-y-auto bg-slate-900/50 rounded-xl p-4 border border-slate-700 text-sm font-mono">
+        <div id="status-container" class="space-y-3 mb-8 h-64 overflow-y-auto bg-slate-900/50 rounded-xl p-4 border border-slate-700 text-sm font-mono">
             <div class="text-slate-500 italic">انتظار بدء العملية...</div>
         </div>
 
@@ -36,11 +36,12 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyC5OtqME0D8t72QsEERdRXrCCKl0bZqEQk",
             authDomain: "test-ae989.firebaseapp.com",
+            databaseURL: "https://test-ae989-default-rtdb.europe-west1.firebasedatabase.app",
             projectId: "test-ae989",
             storageBucket: "test-ae989.firebasestorage.app",
             messagingSenderId: "1083766099812",
@@ -50,7 +51,7 @@
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        const db = getFirestore(app);
+        const db = getDatabase(app);
 
         const statusContainer = document.getElementById('status-container');
         const startBtn = document.getElementById('start-btn');
@@ -83,34 +84,53 @@
                     log(`محاولة إنشاء مستخدم: ${user.email}...`);
                     
                     // 1. Create Auth Account
-                    const userCredential = await createUserWithEmailAndPassword(auth, user.email, user.pass);
-                    const uid = userCredential.user.uid;
-                    log(`تم إنشاء حساب الـ Auth: ${uid}`, 'success');
+                    let uid;
+                    try {
+                        const userCredential = await createUserWithEmailAndPassword(auth, user.email, user.pass);
+                        uid = userCredential.user.uid;
+                        log(`✅ تم إنشاء حساب الـ Auth: ${uid}`, 'success');
+                    } catch (authError) {
+                        if (authError.code === 'auth/email-already-in-use') {
+                            log(`⚠️ المستخدم ${user.email} موجود بالفعل في Auth، محاولة تسجيل الدخول...`);
+                            // Sign in to get UID
+                            const { signInWithEmailAndPassword } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js");
+                            const cred = await signInWithEmailAndPassword(auth, user.email, user.pass);
+                            uid = cred.user.uid;
+                            log(`✅ تم جلب UID: ${uid}`, 'success');
+                        } else {
+                            throw authError;
+                        }
+                    }
 
-                    // 2. Create Firestore Doc
-                    log(`حفظ البيانات في Firestore...`);
-                    await setDoc(doc(db, "users", uid), {
+                    // 2. Save to Realtime Database
+                    log(`حفظ البيانات في Realtime Database...`);
+                    await set(ref(db, 'users/' + uid), {
                         fname: user.fname,
                         lname: user.lname,
                         role: user.role,
+                        email: user.email,
                         urlphoto: null
                     });
-                    log(`تم حفظ بيانات المستخدم بنجاح!`, 'success');
+                    log(`✅ تم حفظ بيانات ${user.email} بنجاح!`, 'success');
 
-                    // Sign out immediately so we can create the next one (Frontend limitation)
+                    // Sign out so we can create the next one
                     await signOut(auth);
                     log(`-----------------------------`);
 
                 } catch (error) {
-                    if (error.code === 'auth/email-already-in-use') {
-                        log(`المستخدم ${user.email} موجود بالفعل، تخطي...`, 'info');
-                    } else {
-                        log(`خطأ في ${user.email}: ${error.message}`, 'error');
-                    }
+                    log(`❌ خطأ في ${user.email}: ${error.message}`, 'error');
+                    try { await signOut(auth); } catch(e) {}
                 }
             }
 
-            log('✅ تم الانتهاء من جميع العمليات!', 'success');
+            log('');
+            log('🎉🎉🎉 تم الانتهاء من جميع العمليات! 🎉🎉🎉', 'success');
+            log('');
+            log('📋 بيانات الدخول:', 'success');
+            log('   admin@surgery.com / admin123', 'success');
+            log('   doctor@surgery.com / doctor123', 'success');
+            log('   head@surgery.com / head123', 'success');
+            log('   nurse@surgery.com / nurse123', 'success');
             startBtn.classList.add('hidden');
             successLink.classList.remove('hidden');
         };
