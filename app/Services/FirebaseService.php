@@ -31,6 +31,10 @@ class FirebaseService
             $decoded = json_decode($credJson, true);
             
             if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                // Critical Fix for Vercel/Heroku: Replace literal '\n' characters with actual newlines for OpenSSL
+                if (isset($decoded['private_key'])) {
+                    $decoded['private_key'] = str_replace('\\n', "\n", $decoded['private_key']);
+                }
                 $factory = $factory->withServiceAccount($decoded);
             } else {
                 // If it still fails, and we are in debug mode, throw a more descriptive error
