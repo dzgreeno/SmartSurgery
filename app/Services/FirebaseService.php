@@ -31,9 +31,20 @@ class FirebaseService
             $decoded = json_decode($credJson, true);
             
             if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-                // Critical Fix for Vercel/Heroku: Replace literal '\n' characters with actual newlines for OpenSSL
+                // Exhaustive Fix for OpenSSL on Vercel/Heroku
                 if (isset($decoded['private_key'])) {
-                    $decoded['private_key'] = str_replace('\\n', "\n", $decoded['private_key']);
+                    $key = $decoded['private_key'];
+                    // Remove any accidental escapes and normalize newlines
+                    $key = str_replace(['\\n', '\n'], "\n", $key);
+                    $key = trim($key);
+                    
+                    // If the key is one giant line (broken PEM), we re-wrap it properly
+                    if (!str_contains($key, "\n") || str_contains($key, "  ")) {
+                        $cleanKey = str_replace(["-----BEGIN PRIVATE KEY-----", "-----END PRIVATE KEY-----", "\r", "\n", " "], "", $key);
+                        $key = "-----BEGIN PRIVATE KEY-----\n" . chunk_split($cleanKey, 64, "\n") . "-----END PRIVATE KEY-----\n";
+                    }
+                    
+                    $decoded['private_key'] = $key;
                 }
                 $factory = $factory->withServiceAccount($decoded);
             } else {
