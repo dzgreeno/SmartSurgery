@@ -142,13 +142,23 @@ Route::middleware(['firebase'])->group(function () {
     */
     Route::middleware(['firebase:admin'])->group(function () {
         Route::get('/admin', function () {
-            $stats = [
-                'surgeries' => Surgery::count(),
-                'patients' => Patient::count(),
-                'doctors' => Doctor::count(),
-                'appointments' => Appointment::where('status', 'pending')->count(),
-                'demands' => Demand::where('status', 'pending')->count(),
-            ];
+            try {
+                $stats = [
+                    'surgeries' => Surgery::count(),
+                    'patients' => Patient::count(),
+                    'doctors' => Doctor::count(),
+                    'appointments' => Appointment::where('status', 'pending')->count(),
+                    'demands' => Demand::where('status', 'pending')->count(),
+                ];
+            } catch (\Exception $e) {
+                $stats = [
+                    'surgeries' => 0,
+                    'patients' => 0,
+                    'doctors' => 0,
+                    'appointments' => 0,
+                    'demands' => 0,
+                ];
+            }
             return view('admin.dashboard', compact('stats'));
         })->name('admin.dashboard');
 
