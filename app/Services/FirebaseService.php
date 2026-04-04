@@ -17,17 +17,28 @@ class FirebaseService
         $credJson = env('FIREBASE_CREDENTIALS');
 
         if ($credJson) {
-            $credJson = trim($credJson);
+            // Aggressively clean the string (remove whitespace and wrapping quotes)
+            $credJson = trim($credJson, " \t\n\r\0\x0B\"");
             
-            // Handle Base64 encoded JSON (Safe for Vercel env vars)
+            // Handle Base64 encoded JSON
             if (!str_contains($credJson, '{') && base64_decode($credJson, true)) {
-                $credJson = base64_decode($credJson);
+                $decodedString = base64_decode($credJson);
+                if ($decodedString) {
+                    $credJson = $decodedString;
+                }
             }
 
             $decoded = json_decode($credJson, true);
             
             if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
                 $factory = $factory->withServiceAccount($decoded);
+            } else {
+                // If it still fails, and we are in debug mode, throw a more descriptive error
+                if (config('app.debug')) {
+                    $error = json_last_error_msg();
+                    $preview = substr($credJson, 0, 30);
+                    throw new \RuntimeException("Firebase JSON Error: $error. Data starts with: $preview");
+                }
             }
         } elseif (file_exists($credPath)) {
             // Load from Local File (if exists)
