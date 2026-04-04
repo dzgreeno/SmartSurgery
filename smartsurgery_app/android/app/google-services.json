@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "181325973586",
+    "project_id": "smartsurgery",
+    "storage_bucket": "smartsurgery.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:181325973586:android:d8dac49c9b426811c7f78b",
+        "android_client_info": {
+          "package_name": "com.example.smartsurgery_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBrnxXfBTIUtZswmKDpygn3qWLWAgHvO5Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
