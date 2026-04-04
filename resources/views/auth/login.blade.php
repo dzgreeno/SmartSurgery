@@ -199,18 +199,25 @@ loginForm.addEventListener('submit', async (e) => {
   btnIcon.textContent = '⏳';
 
   try {
-    // 1. Firebase Auth Sign In
+    // 1. Pre-check: Is Firestore reachable?
+    try {
+        await fetch('https://firestore.googleapis.com', { mode: 'no-cors', cache: 'no-cache' });
+    } catch(err) {
+        throw new Error('❌ اتصا بك بـ Firestore مقطوع! تأكد من تعطيل مانع الإعلانات (Ad-blocker) أو جرب شبكة أخرى.');
+    }
+
+    // 2. Firebase Auth Sign In
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
     
-    // 2. Fetch User Role from Firestore
+    // 3. Fetch User Role from Firestore
     const docRef = doc(db, "users", user.uid);
     const docSnap = await getDoc(docRef);
 
     if (docSnap.exists()) {
       const userData = docSnap.data();
       
-      // 3. Fill Bridge Form and Submit to PHP
+      // 4. Fill Bridge Form and Submit to PHP
       document.getElementById('bridge-uid').value = user.uid;
       document.getElementById('bridge-email').value = user.email;
       document.getElementById('bridge-fname').value = userData.fname || '';
@@ -221,18 +228,20 @@ loginForm.addEventListener('submit', async (e) => {
       btnText.textContent = 'تم النجاح! جاري الدخول...';
       document.getElementById('bridge-form').submit();
     } else {
-      throw new Error('❌ عذراً، لم يتم العثور على بيانات هذا المستخدم في Firestore.');
+      throw new Error('❌ عذراً، لم يتم العثور على بيانات هذا المستخدم في Firestore (قاعدة البيانات فارغة).');
     }
 
   } catch (error) {
     console.error(error);
     statusMsg.style.display = 'block';
     
-    let message = '❌ حدث خطأ أثناء تسجيل الدخول';
+    let message = '❌ حدث خطأ في الدخول: ' + error.message;
     if (error.code === 'auth/invalid-credential') message = '❌ البريد الإلكتروني أو كلمة المرور غير صحيحة';
-    else if (error.code === 'auth/user-not-found') message = '❌ لم يتم العثور على مستخدمبهذا البريد';
+    else if (error.code === 'auth/user-not-found') message = '❌ لم يتم العثور على مستخدم بنفس البريد';
     else if (error.code === 'auth/wrong-password') message = '❌ كلمة المرور خاطئة';
-    else message = error.message;
+    else if (error.message.includes('offline') || error.message.includes('fetch')) {
+        message = '❌ مشكلة في الشبكة: يرجى تعطيل الـ VPN أو مانع الإعلانات (Ad-blocker) والمحاولة مجدداً.';
+    }
 
     statusMsg.textContent = message;
     btnSubmit.disabled = false;
