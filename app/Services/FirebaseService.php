@@ -17,10 +17,13 @@ class FirebaseService
         $credJson = env('FIREBASE_CREDENTIALS');
 
         if ($credJson) {
-            // Load from Environment Variable (JSON String)
-            // Trim any accidental whitespace or hidden characters
             $credJson = trim($credJson);
             
+            // Handle Base64 encoded JSON (Safe for Vercel env vars)
+            if (!str_contains($credJson, '{') && base64_decode($credJson, true)) {
+                $credJson = base64_decode($credJson);
+            }
+
             $decoded = json_decode($credJson, true);
             
             if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
