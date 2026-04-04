@@ -30,6 +30,69 @@ Route::get('/general-surgery', fn() => view('general-surgery'))->name('general.s
 Route::get('/maternite', fn() => view('maternite'))->name('maternite');
 Route::get('/pregnancy', fn() => view('pregnancy'))->name('pregnancy');
 
+// رابط سحري لتهيئة قاعدة البيانات بالحسابات التجريبية (للتطوير فقط)
+Route::get('/system-seed-db', function (App\Services\FirebaseService $firebase) {
+    $auth = $firebase->getAuth();
+    $db = $firebase->getFirestore();
+
+    $users = [
+        [
+            'email' => 'admin@surgery.com',
+            'password' => 'admin123',
+            'fname' => 'مدير',
+            'lname' => 'النظام',
+            'role' => 'admin',
+        ],
+        [
+            'email' => 'doctor@surgery.com',
+            'password' => 'doctor123',
+            'fname' => 'دكتور',
+            'lname' => 'علي',
+            'role' => 'doctor',
+        ],
+        [
+            'email' => 'head@surgery.com',
+            'password' => 'head123',
+            'fname' => 'رئيسة',
+            'lname' => 'المصلحة',
+            'role' => 'head_women',
+        ],
+        [
+            'email' => 'nurse@surgery.com',
+            'password' => 'nurse123',
+            'fname' => 'ممرضة',
+            'lname' => 'سارة',
+            'role' => 'nurse',
+        ],
+    ];
+
+    $results = [];
+    foreach ($users as $u) {
+        try {
+            // إنشاء في Firebase Auth
+            $createdUser = $auth->createUser([
+                'email' => $u['email'],
+                'password' => $u['password'],
+                'displayName' => $u['fname'] . ' ' . $u['lname'],
+            ]);
+            $uid = $createdUser->uid;
+
+            // حفظ البيانات في Firestore
+            $db->collection('users')->document($uid)->set([
+                'fname' => $u['fname'],
+                'lname' => $u['lname'],
+                'role' => $u['role'],
+                'urlphoto' => null,
+            ]);
+            $results[] = "✅ تم إنشاء: " . $u['email'];
+        } catch (\Exception $e) {
+            $results[] = "❌ فشل إنشاء " . $u['email'] . " (قد يكون موجوداً بالفعل أو هناك خطأ: " . $e->getMessage() . ")";
+        }
+    }
+
+    return implode('<br>', $results) . "<br><br><b>الموقع جاهز الآن التجربة! اذهب لـ <a href='/login'>تسجيل الدخول</a></b>";
+});
+
 // طلبات العمليات (متاح للعامة)
 Route::view('/demande', 'demande')->name('demande');
 Route::post('/demands', [DemandController::class, 'store']);
