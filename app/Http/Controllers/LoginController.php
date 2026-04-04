@@ -71,6 +71,33 @@ class LoginController extends Controller
     }
 
     /**
+     * تسجيل الدخول عبر الجلسة القادمة من الجافا سكريبت (لتجاوز مشاكل السيرفر)
+     */
+    public function loginViaToken(Request $request)
+    {
+        $request->validate([
+            'uid' => 'required',
+            'email' => 'required|email',
+            'fname' => 'required',
+            'lname' => 'required',
+            'role' => 'required'
+        ]);
+
+        session([
+            'firebase_uid' => $request->uid,
+            'firebase_user' => [
+                'email' => $request->email,
+                'fname' => $request->fname,
+                'lname' => $request->lname,
+                'urlphoto' => $request->urlphoto ?? null,
+            ],
+            'firebase_role' => $request->role,
+        ]);
+
+        return $this->redirectByRole($request->role);
+    }
+
+    /**
      * توجيه المستخدم حسب دوره
      */
     protected function redirectByRole($role)

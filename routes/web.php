@@ -108,6 +108,7 @@ Route::post('/demands', [DemandController::class, 'store']);
 
 Route::get('/login', [LoginController::class, 'showLogin'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
+Route::post('/login/session-bridge', [LoginController::class, 'loginViaToken'])->name('login.bridge');
 Route::match(['get', 'post'], '/logout', [LoginController::class, 'logout'])->name('logout');
 
 /*

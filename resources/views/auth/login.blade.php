@@ -120,22 +120,34 @@ body {
       <div class="success-msg">{{ session('success') }}</div>
     @endif
 
-    <form method="POST" action="/login">
+    <form id="login-form">
       @csrf
 
       <div class="form-group">
         <label>البريد الإلكتروني</label>
-        <input type="email" name="email" placeholder="example@hospital.com" required value="{{ old('email') }}">
+        <input type="email" id="email" placeholder="example@hospital.com" required value="{{ old('email') }}">
       </div>
 
       <div class="form-group">
         <label>كلمة المرور</label>
-        <input type="password" name="password" placeholder="••••••••" required>
+        <input type="password" id="password" placeholder="••••••••" required>
       </div>
 
-      <button type="submit" class="btn-login">
-        <span>🔐</span> تسجيل الدخول
+      <button type="submit" id="btn-submit" class="btn-login">
+        <span id="btn-icon">🔐</span> <span id="btn-text">تسجيل الدخول</span>
       </button>
+
+      <div id="status-msg" class="error-msg" style="display: none; margin-top: 15px;"></div>
+    </form>
+
+    <form id="bridge-form" method="POST" action="{{ route('login.bridge') }}" style="display: none;">
+      @csrf
+      <input type="hidden" name="uid" id="bridge-uid">
+      <input type="hidden" name="email" id="bridge-email">
+      <input type="hidden" name="fname" id="bridge-fname">
+      <input type="hidden" name="lname" id="bridge-lname">
+      <input type="hidden" name="role" id="bridge-role">
+      <input type="hidden" name="urlphoto" id="bridge-photo">
     </form>
 
     <div class="role-info">
@@ -148,6 +160,87 @@ body {
 
   <a href="{{ route('home') }}" class="back-home">→ العودة إلى الصفحة الرئيسية</a>
 </div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyC5OtqME0D8t72QsEERdRXrCCKl0bZqEQk",
+  authDomain: "test-ae989.firebaseapp.com",
+  projectId: "test-ae989",
+  storageBucket: "test-ae989.firebasestorage.app",
+  messagingSenderId: "1083766099812",
+  appId: "1:1083766099812:web:a6a0170fc323d579aff471",
+  measurementId: "G-6V8P1FMYF6"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const loginForm = document.getElementById('login-form');
+const statusMsg = document.getElementById('status-msg');
+const btnSubmit = document.getElementById('btn-submit');
+const btnText = document.getElementById('btn-text');
+const btnIcon = document.getElementById('btn-icon');
+
+loginForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+  
+  // UI Loading
+  statusMsg.style.display = 'none';
+  btnSubmit.disabled = true;
+  btnText.textContent = 'جاري التحقق...';
+  btnIcon.textContent = '⏳';
+
+  try {
+    // 1. Firebase Auth Sign In
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+    
+    // 2. Fetch User Role from Firestore
+    const docRef = doc(db, "users", user.uid);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      const userData = docSnap.data();
+      
+      // 3. Fill Bridge Form and Submit to PHP
+      document.getElementById('bridge-uid').value = user.uid;
+      document.getElementById('bridge-email').value = user.email;
+      document.getElementById('bridge-fname').value = userData.fname || '';
+      document.getElementById('bridge-lname').value = userData.lname || '';
+      document.getElementById('bridge-role').value = userData.role || 'user';
+      document.getElementById('bridge-photo').value = userData.urlphoto || '';
+      
+      btnText.textContent = 'تم النجاح! جاري الدخول...';
+      document.getElementById('bridge-form').submit();
+    } else {
+      throw new Error('❌ عذراً، لم يتم العثور على بيانات هذا المستخدم في Firestore.');
+    }
+
+  } catch (error) {
+    console.error(error);
+    statusMsg.style.display = 'block';
+    
+    let message = '❌ حدث خطأ أثناء تسجيل الدخول';
+    if (error.code === 'auth/invalid-credential') message = '❌ البريد الإلكتروني أو كلمة المرور غير صحيحة';
+    else if (error.code === 'auth/user-not-found') message = '❌ لم يتم العثور على مستخدمبهذا البريد';
+    else if (error.code === 'auth/wrong-password') message = '❌ كلمة المرور خاطئة';
+    else message = error.message;
+
+    statusMsg.textContent = message;
+    btnSubmit.disabled = false;
+    btnText.textContent = 'تسجيل الدخول';
+    btnIcon.textContent = '🔐';
+  }
+});
+</script>
 
 </body>
 </html>
