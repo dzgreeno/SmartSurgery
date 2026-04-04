@@ -141,31 +141,27 @@ Route::middleware(['firebase'])->group(function () {
     |----------------------------------------------------------------------
     */
     Route::middleware(['firebase:admin'])->group(function () {
-        Route::get('/admin', function () {
-            try {
-                $stats = [
-                    'surgeries' => Surgery::count(),
-                    'patients' => Patient::count(),
-                    'doctors' => Doctor::count(),
-                    'appointments' => Appointment::where('status', 'pending')->count(),
-                    'demands' => Demand::where('status', 'pending')->count(),
-                ];
-            } catch (\Exception $e) {
-                $stats = [
-                    'surgeries' => 0,
-                    'patients' => 0,
-                    'doctors' => 0,
-                    'appointments' => 0,
-                    'demands' => 0,
-                ];
-            }
-            return view('admin.dashboard', compact('stats'));
-        })->name('admin.dashboard');
 
+        // لوحة التحكم الرئيسية
+        Route::get('/admin', fn() => view('admin.dashboard'))->name('admin.dashboard');
+
+        // إدارة المستخدمين (CRUD — البيانات تُدار عبر JS + Firebase RTDB)
         Route::resource('admin/users', FirebaseUserController::class);
 
-        // إدارة طلبات العمليات
-        Route::get('/admin/demands', [DemandController::class, 'index'])->name('admin.demands');
+        // العمليات الجراحية
+        Route::get('/surgeries', fn() => view('admin.surgeries'))->name('admin.surgeries');
+        Route::get('/admin/surgeries', fn() => view('admin.surgeries'))->name('admin.surgeries.alt');
+
+        // طلبات العمليات
+        Route::get('/admin/demands', function () {
+            try {
+                $demands = \App\Models\Demand::orderBy('created_at', 'desc')->get();
+            } catch (\Exception $e) {
+                $demands = collect([]);
+            }
+            return view('admin.demands', compact('demands'));
+        })->name('admin.demands');
+
         Route::post('/admin/demands/{id}/status', [DemandController::class, 'updateStatus'])->name('admin.demands.status');
     });
 
