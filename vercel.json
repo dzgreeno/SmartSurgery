@@ -1,6 +1,7 @@
 {
     "version": 2,
     "framework": null,
+    "outputDirectory": "public",
     "installCommand": "echo 'Skipping frontend install'",
     "buildCommand": "echo 'No frontend build required'",
     "functions": {
