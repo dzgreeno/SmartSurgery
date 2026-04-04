@@ -43,6 +43,22 @@ $app->singleton(
 
 /*
 |--------------------------------------------------------------------------
+| Vercel Serverless Storage Override
+|--------------------------------------------------------------------------
+| Vercel uses a highly restrictive read-only file system. We must override
+| the default storage path to use the writable /tmp directory.
+*/
+if (isset($_ENV['VERCEL']) || isset($_SERVER['VERCEL'])) {
+    $app->useStoragePath('/tmp/storage');
+    // Ensure critical directories exist
+    if (!is_dir('/tmp/storage/framework/views')) @mkdir('/tmp/storage/framework/views', 0777, true);
+    if (!is_dir('/tmp/storage/framework/cache/data')) @mkdir('/tmp/storage/framework/cache/data', 0777, true);
+    if (!is_dir('/tmp/storage/framework/sessions')) @mkdir('/tmp/storage/framework/sessions', 0777, true);
+    if (!is_dir('/tmp/storage/logs')) @mkdir('/tmp/storage/logs', 0777, true);
+}
+
+/*
+|--------------------------------------------------------------------------
 | Return The Application
 |--------------------------------------------------------------------------
 |

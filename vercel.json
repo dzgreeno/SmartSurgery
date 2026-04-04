@@ -19,7 +19,8 @@
     ],
     "env": {
         "APP_ENV": "production",
-        "APP_DEBUG": "false",
+        "APP_DEBUG": "true",
+        "APP_KEY": "base64:8x7HtipNgIzIwLBd9T6ErCD0L0TWIdmHPVEPosUpS0Q=",
         "APP_URL": "https://smartsurgery.vercel.app",
         "CACHE_DRIVER": "array",
         "SESSION_DRIVER": "cookie",
