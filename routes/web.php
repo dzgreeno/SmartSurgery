@@ -219,6 +219,12 @@ Route::middleware(['firebase'])->group(function () {
         })->name('surgery.head_women');
     });
 
+    Route::middleware(['firebase:admin,head_men'])->group(function () {
+        Route::get('/surgery/men/head', function () {
+            return view('surgery_men');
+        })->name('surgery.head_men');
+    });
+
     /*
     |----------------------------------------------------------------------
     | CRUD العمليات — admin + heads

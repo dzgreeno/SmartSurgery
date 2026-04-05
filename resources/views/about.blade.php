@@ -277,10 +277,12 @@ footer { background: var(--deep); padding: 50px 50px 24px; }
   <ul class="nav-links">
     <li><a href="{{ route('home') }}">الرئيسية</a></li>
     <li class="dropdown">
-      <span class="dropdown-toggle" style="cursor:pointer">قسم الجراحة▾</span>
+      <span class="dropdown-toggle" style="cursor:pointer">انواع الجراحة▾</span>
       <div class="dropdown-menu">
-        <a href="{{ route('surgery.women') }}">جراحة النساء والتوليد</a>
-        <a href="{{ route('surgery.men') }}">جراحة الرجال</a>
+        @if(session('firebase_user'))
+          <a href="{{ route('surgery.women') }}">جراحة النساء والتوليد</a>
+          <a href="{{ route('surgery.men') }}">جراحة الرجال</a>
+        @endif
         <a href="{{ route('orthopedics') }}">جراحة العظام والمفاصل</a>
         <a href="{{ route('urology') }}">جراحة المسالك البولية</a>
         <a href="{{ route('general.surgery') }}">الجراحة العامة</a>
