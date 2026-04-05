@@ -1147,7 +1147,7 @@ updateProgress();
           </div>
           <div class="c-txt">
             <strong>الموقع</strong>
-            <span>مستشفى عاشور زيان، أولاد جلال — بسكرة</span>
+            <span>مستشفى عاشور زيان، أولاد جلال — ولاية أولاد جلال</span>
           </div>
         </div>
         <div class="contact-row">
@@ -1183,7 +1183,7 @@ updateProgress();
 </div>
 
 <footer>
-  <span>© {{ date('Y') }} <strong>مستشفى عاشور زيان</strong> — قسم الأمومة والطفولة — أولاد جلال، بسكرة</span>
+  <span>© {{ date('Y') }} <strong>مستشفى عاشور زيان</strong> — قسم الأمومة والطفولة — أولاد جلال، ولاية أولاد جلال</span>
   <span style="display:flex;align-items:center;gap:4px">صُنع بـ <span class="ft-heart">❤</span> لخدمتكم</span>
 </footer>
 

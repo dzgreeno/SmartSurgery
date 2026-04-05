@@ -616,7 +616,7 @@ footer{background:linear-gradient(135deg,#071e26,#0b3c49);padding:60px 48px 0}
   </div>
   <div class="hero-overlay"></div>
   <div class="hero-content">
-    <div class="hero-badge">🏅 أولاد جلال — بسكرة</div>
+    <div class="hero-badge">🏅 أولاد جلال</div>
     <h1 class="hero-title">
       رعاية صحية متكاملة<br>
       بأيدٍ <span>متخصصة وأمينة</span>
@@ -853,7 +853,7 @@ footer{background:linear-gradient(135deg,#071e26,#0b3c49);padding:60px 48px 0}
   <div class="contact-inner">
     <div class="contact-card reveal">
       <div class="contact-icon">📍</div>
-      <div class="contact-info"><h4>موقعنا</h4><p>أولاد جلال — ولاية بسكرة<br>الجزائر</p></div>
+      <div class="contact-info"><h4>موقعنا</h4><p>أولاد جلال — ولاية أولاد جلال<br>الجزائر</p></div>
     </div>
     <div class="contact-card reveal">
       <div class="contact-icon">📞</div>
@@ -902,7 +902,7 @@ footer{background:linear-gradient(135deg,#071e26,#0b3c49);padding:60px 48px 0}
     </div>
     <div class="footer-col">
       <h4>معلومات الاتصال</h4>
-      <div class="footer-contact-item"><span class="icon">📍</span><p>أولاد جلال — ولاية بسكرة، الجزائر</p></div>
+      <div class="footer-contact-item"><span class="icon">📍</span><p>أولاد جلال — ولاية أولاد جلال، الجزائر</p></div>
       <div class="footer-contact-item"><span class="icon">📞</span><p>014253678</p></div>
       <div class="footer-contact-item"><span class="icon">🚑</span><p>الطوارئ: متاح 24/24</p></div>
       <div class="footer-contact-item"><span class="icon">📧</span><p>contact@hopital-achour-ziane.dz</p></div>
