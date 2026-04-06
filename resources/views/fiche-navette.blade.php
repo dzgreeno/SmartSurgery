@@ -140,13 +140,25 @@ body{font-family:"Cairo",Arial,sans-serif;background:var(--bg);color:var(--text)
 }
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
-@media print{
-  body,html{background:#fff;}
-  .topbar,.toast{display:none!important;}
-  .pw{padding:0;max-width:100%;}
-  .fiche{box-shadow:none;}
-  .st,.mv th{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
-}
+  @media print{
+    body,html{background:#fff;}
+    .topbar,.toast, .appt-section{display:none!important;}
+    .pw{padding:0;max-width:100%;}
+    .fiche{box-shadow:none;}
+    .st,.mv th{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  }
+
+  .appt-section { max-width: 900px; margin: 40px auto; padding: 20px; background: var(--bg2); border: 1px solid var(--border); border-radius: var(--r); }
+  .appt-section h3 { margin-bottom: 20px; color: var(--text); border-bottom: 1px solid var(--border); padding-bottom: 10px; display:flex; align-items:center; gap:8px; }
+  .appt-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+  .appt-card { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--r); padding: 16px; display:flex; flex-direction:column; gap:8px; transition: var(--t); }
+  .appt-card:hover { transform: translateY(-2px); border-color: var(--accent); }
+  .appt-card-hdr { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed var(--border); padding-bottom: 8px; }
+  .appt-name { font-weight: 800; color: var(--gold); font-size: 14px; }
+  .appt-time { font-size: 13px; font-weight: 700; color: var(--accent); background: rgba(45,212,191,.1); padding: 2px 8px; border-radius: 12px; }
+  .appt-date { font-size: 11px; color: var(--muted); }
+  .appt-btn { font-size: 11px; padding: 4px 10px; background: var(--bg2); color: var(--text); border: 1px solid var(--border); border-radius: 4px; cursor: pointer; text-align: center; margin-top: auto; }
+  .appt-btn:hover { background: var(--accent); color: var(--bg); border-color: var(--accent); }
 </style>
 </head>
 <body>
@@ -320,6 +332,13 @@ body{font-family:"Cairo",Arial,sans-serif;background:var(--bg);color:var(--text)
 </div>
 </div>
 
+<div class="appt-section">
+  <h3>📅 المواعيد المؤكدة - قسم جراحة النساء</h3>
+  <div class="appt-grid" id="confirmedAppts">
+    <div style="color:var(--muted); font-size:12px;">جاري تحميل المواعيد...</div>
+  </div>
+</div>
+
 <div class="toast" id="toast">
   <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
   <span id="toastMsg">تم الحفظ بنجاح</span>
@@ -339,6 +358,58 @@ const app = initializeApp({
 });
 
 const db = getDatabase(app);
+
+import { onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+// Fetch Confirm Appointments
+const apptEl = document.getElementById('confirmedAppts');
+onValue(ref(db, 'appointments/confirmed'), snapshot => {
+  apptEl.innerHTML = '';
+  if(!snapshot.exists()) {
+    apptEl.innerHTML = '<div style="color:var(--muted); font-size:12px;">لا توجد مواعيد مؤكدة حالياً.</div>';
+    return;
+  }
+  const data = snapshot.val();
+  const reqs = Object.keys(data).map(k => ({id:k, ...data[k]}))
+    .filter(r => r.department.includes('جراحة النساء والتوليد') || r.department.includes('الأمومة'))
+    .sort((a,b) => {
+      // sort by date and exactly time
+      return new Date(a.date+'T'+a.exactTime) - new Date(b.date+'T'+b.exactTime);
+    });
+    
+  if(reqs.length === 0) {
+    apptEl.innerHTML = '<div style="color:var(--muted); font-size:12px;">لا توجد مواعيد مؤكدة في هذا القسم حالياً.</div>';
+    return;
+  }
+  
+  reqs.forEach(req => {
+    apptEl.innerHTML += `
+      <div class="appt-card">
+        <div class="appt-card-hdr">
+          <span class="appt-name">${req.fname} ${req.lname}</span>
+          <span class="appt-time">⏰ ${req.exactTime}</span>
+        </div>
+        <div class="appt-date">📅 التـاريخ: ${req.date}</div>
+        <div class="appt-date">📞 الهـاتـف: <span dir="ltr">${req.phone}</span></div>
+        <button class="appt-btn" onclick="fillFiche('${req.fname}', '${req.lname}')">📥 ملء بيانات الفيش نافيت</button>
+      </div>
+    `;
+  });
+});
+
+window.fillFiche = function(fname, lname) {
+  const inputs = document.querySelectorAll('#ficheMain input[type="text"]');
+  // Just a simple automatic fill for Name
+  inputs.forEach(inp => {
+    if(inp.parentElement.innerText.includes('NOM') && !inp.parentElement.innerText.includes('JEUNE')) {
+      if(!inp.value) inp.value = lname;
+    }
+    if(inp.parentElement.innerText.includes('PRÉNOM')) {
+      if(!inp.value) inp.value = fname;
+    }
+  });
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
 
 /* تاريخ اليوم تلقائي */
 document.getElementById('ficheDate').value =

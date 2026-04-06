@@ -160,7 +160,7 @@ Route::middleware(['firebase'])->group(function () {
             return view('admin.surgeries');
         })->name('admin.surgeries');
 
-        // طلبات العمليات
+        // طلبات العمليات القديمة (نظام قديم)
         Route::get('/admin/demands', function () {
             try {
                 $demands = \App\Models\Demand::orderBy('created_at', 'desc')->get();
@@ -171,6 +171,11 @@ Route::middleware(['firebase'])->group(function () {
         })->name('admin.demands');
 
         Route::post('/admin/demands/{id}/status', [DemandController::class, 'updateStatus'])->name('admin.demands.status');
+
+        // طلبات حجز المواعيد الجديدة (نظام Firebase)
+        Route::get('/admin/appointment-requests', function () {
+            return view('admin.appointment_requests');
+        })->name('admin.appointment_requests');
 
         // جدول المناوبة الطبية للمختصين (يديرها المدير فقط)
         Route::get('/planning-garde', fn() => view('planning-garde'))->name('planning-garde');

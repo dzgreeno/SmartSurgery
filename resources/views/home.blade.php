@@ -843,7 +843,18 @@ footer{background:linear-gradient(135deg,#071e26,#0b3c49);padding:60px 48px 0}
         </select>
       </div>
       <div class="fg"><label>التاريخ المفضل</label><input type="date" id="fdate"></div>
-      <button class="btn-submit" onclick="handleBooking()">✅ تأكيد الحجز</button>
+      <div class="fg" style="display:flex; gap:10px; align-items:flex-end;">
+        <div style="flex:1">
+          <label>التحقق البشري</label>
+          <div style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:var(--radius-sm);padding:11px 14px;color:var(--gold);font-weight:bold;text-align:center;font-size:16px;direction:ltr;" id="captcha-question">
+            ?
+          </div>
+        </div>
+        <div style="flex:1">
+          <input type="number" id="captcha-answer" placeholder="النتيجة" style="font-size:16px;text-align:center;">
+        </div>
+      </div>
+      <button class="btn-submit" id="btn-submit-booking">✅ تأكيد الحجز</button>
     </div>
   </div>
 </section>
@@ -915,7 +926,24 @@ footer{background:linear-gradient(135deg,#071e26,#0b3c49);padding:60px 48px 0}
 
 <button id="backTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">▲</button>
 
-<script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, push, serverTimestamp, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyC5OtqME0D8t72QsEERdRXrCCKl0bZqEQk",
+  authDomain: "test-ae989.firebaseapp.com",
+  databaseURL: "https://test-ae989-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "test-ae989",
+  storageBucket: "test-ae989.firebasestorage.app",
+  messagingSenderId: "1083766099812",
+  appId: "1:1083766099812:web:a6a0170fc323d579aff471",
+  measurementId: "G-6V8P1FMYF6"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
 // Hero Slider
 const slides = document.querySelectorAll('.hero-slide');
 const dots   = document.querySelectorAll('.dot');
@@ -981,8 +1009,26 @@ window.addEventListener('scroll', () => {
     : '0 2px 20px rgba(11,60,73,0.1)';
 });
 
-// Booking Form
-function handleBooking() {
+// Captcha & Booking Form
+let captchaExpected = 0;
+function generateCaptcha() {
+  const num1 = Math.floor(Math.random() * 10);
+  const num2 = Math.floor(Math.random() * 10);
+  const isAdd = Math.random() > 0.5;
+  if(isAdd) {
+    captchaExpected = num1 + num2;
+    document.getElementById('captcha-question').textContent = `${num1} + ${num2} = ?`;
+  } else {
+    // ensure num1 is >= num2 for simple subtraction
+    const n1 = Math.max(num1, num2);
+    const n2 = Math.min(num1, num2);
+    captchaExpected = n1 - n2;
+    document.getElementById('captcha-question').textContent = `${n1} - ${n2} = ?`;
+  }
+}
+document.addEventListener('DOMContentLoaded', generateCaptcha);
+
+document.getElementById('btn-submit-booking').addEventListener('click', async function() {
   const fields = [
     document.getElementById('fname'),
     document.getElementById('lname'),
@@ -999,11 +1045,46 @@ function handleBooking() {
       inp.style.borderColor = '';
     }
   });
-  if (valid) {
-    alert('✅ تم استلام طلب الحجز بنجاح!\nسيتصل بك فريقنا قريباً لتأكيد الموعد.');
-    fields.forEach(inp => inp.value = '');
+
+  const captchaInput = document.getElementById('captcha-answer');
+  if (!captchaInput.value || parseInt(captchaInput.value) !== captchaExpected) {
+     captchaInput.style.borderColor = '#ef4444';
+     alert('الرجاء الإجابة على سؤال التحقق البشري بشكل صحيح.');
+     generateCaptcha();
+     return;
+  } else {
+     captchaInput.style.borderColor = '';
   }
-}
+
+  if (valid) {
+    const btn = this;
+    const oldTxt = btn.innerHTML;
+    btn.innerHTML = '⏳ جاري الإرسال...';
+    btn.disabled = true;
+
+    try {
+      const newReqRef = push(ref(db, 'appointments/requests'));
+      await set(newReqRef, {
+        fname: document.getElementById('fname').value,
+        lname: document.getElementById('lname').value,
+        phone: document.getElementById('fphone').value,
+        department: document.getElementById('fspec').value,
+        date: document.getElementById('fdate').value,
+        status: "Pending",
+        createdAt: serverTimestamp()
+      });
+      alert('✅ تم استلام طلب الحجز بنجاح! وسيتواصل فريقنا معك قريبًا لتأكيد الموعد.');
+      fields.forEach(inp => inp.value = '');
+      captchaInput.value = '';
+      generateCaptcha();
+    } catch (err) {
+      console.error(err);
+      alert('❌ حدث خطأ أثناء إرسال الطلب!');
+    }
+    btn.innerHTML = oldTxt;
+    btn.disabled = false;
+  }
+});
 
 // Dropdown click
 document.querySelector('.dropdown-toggle').addEventListener('click', function(e) {

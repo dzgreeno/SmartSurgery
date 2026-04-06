@@ -208,7 +208,11 @@ html,body{height:100%;font-family:'Cairo',sans-serif;background:var(--bg);color:
       <span class="nav-icon">👥</span> المستخدمون
     </a>
 
-    <div class="nav-section">العمليات</div>
+    <div class="nav-section">العمليات والمواعيد</div>
+    <a href="{{ route('admin.appointment_requests') }}" class="nav-link">
+      <span class="nav-icon">📅</span> طلبات المواعيد
+      <span id="sidebar-badge" style="display:none;background:var(--red);color:#fff;border-radius:10px;padding:2px 8px;font-size:10px;margin-right:auto;">0</span>
+    </a>
     <a href="{{ route('admin.demands') }}" class="nav-link">
       <span class="nav-icon">📋</span> طلبات العمليات
     </a>
@@ -254,8 +258,18 @@ html,body{height:100%;font-family:'Cairo',sans-serif;background:var(--bg);color:
 <div class="main-wrap">
   <div class="topbar">
     <span class="topbar-title">📊 لوحة تحكم المدير</span>
-    <span class="topbar-badge">👑 مدير النظام</span>
+    <div style="display:flex; gap:10px; align-items:center;">
+      <div id="topbar-notifications" class="topbar-badge pulse-anim" style="background:var(--red);color:#fff;display:none;cursor:pointer;" onclick="window.location.href='{{ route('admin.appointment_requests') }}'">
+        🔔 <span id="topbar-badge-count">0</span> طلبات جديدة
+      </div>
+      <span class="topbar-badge">👑 مدير النظام</span>
+    </div>
   </div>
+
+  <style>
+  @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+  .pulse-anim { animation: pulse 2s infinite; }
+  </style>
 
   <div class="content">
     <!-- WELCOME -->
@@ -312,11 +326,18 @@ html,body{height:100%;font-family:'Cairo',sans-serif;background:var(--bg);color:
           <p>طبيب، ممرضة، رئيسة مصلحة...</p>
         </div>
       </a>
+      <a href="{{ route('admin.appointment_requests') }}" class="action-card">
+        <div class="action-card-icon">📅</div>
+        <div>
+          <h4>طلبات حجز المواعيد</h4>
+          <p>قبول وترتيب مواعيد المرضى الجديدة</p>
+        </div>
+      </a>
       <a href="{{ route('admin.demands') }}" class="action-card">
         <div class="action-card-icon">📋</div>
         <div>
           <h4>طلبات العمليات</h4>
-          <p>مراجعة وقبول أو رفض الطلبات</p>
+          <p>مراجعة وقبول أو رفض الطلبات القديمة</p>
         </div>
       </a>
       <a href="{{ route('admin.surgeries') }}" class="action-card">
@@ -367,7 +388,7 @@ html,body{height:100%;font-family:'Cairo',sans-serif;background:var(--bg);color:
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getDatabase, ref, get, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const app = initializeApp({
   apiKey: "AIzaSyC5OtqME0D8t72QsEERdRXrCCKl0bZqEQk",
@@ -390,6 +411,35 @@ get(ref(db, 'users')).then(snap => {
   }
 }).catch(() => {
   document.getElementById('stat-users').textContent = '0';
+});
+
+// Listen to incoming appointments
+const requestsRef = ref(db, 'appointments/requests');
+onValue(requestsRef, (snapshot) => {
+  let pendingCount = 0;
+  if(snapshot.exists()) {
+    const data = snapshot.val();
+    Object.keys(data).forEach(k => {
+      if(data[k].status === 'Pending') pendingCount++;
+    });
+  }
+  
+  const topBadge = document.getElementById('topbar-notifications');
+  const topBadgeCount = document.getElementById('topbar-badge-count');
+  const sidebarBadge = document.getElementById('sidebar-badge');
+  const statBadge = document.querySelector('.stat-card.stat-gold .stat-value');
+  
+  if (pendingCount > 0) {
+    topBadge.style.display = 'block';
+    topBadgeCount.textContent = pendingCount;
+    sidebarBadge.style.display = 'inline-block';
+    sidebarBadge.textContent = pendingCount;
+    if(statBadge) statBadge.textContent = pendingCount;
+  } else {
+    topBadge.style.display = 'none';
+    sidebarBadge.style.display = 'none';
+    if(statBadge) statBadge.textContent = '0';
+  }
 });
 </script>
 </body>
