@@ -164,14 +164,14 @@ body{font-family:"Cairo",Arial,sans-serif;background:var(--bg);color:var(--text)
 <body>
 
 <div class="topbar">
-  <a href="/surgery/women" class="back-btn">
-    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-    جراحة النساء
+  <a href="javascript:history.back()" class="back-btn">
+    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    الرجوع
   </a>
   <div class="sep"></div>
   <div>
     <div class="tb-title">Fiche Navette</div>
-    <div class="tb-sub">قسم جراحة النساء — مستشفى عاشور زيان</div>
+    <div class="tb-sub">مستشفى عاشور زيان</div>
   </div>
   <div class="sp"></div>
   <button class="btn-print" onclick="window.print()">
@@ -180,7 +180,7 @@ body{font-family:"Cairo",Arial,sans-serif;background:var(--bg);color:var(--text)
   </button>
   <button class="btn-save" onclick="saveFiche()">
     <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-    حفظ
+    حفظ في قاعدة البيانات
   </button>
 </div>
 

@@ -1264,6 +1264,14 @@ tbody tr:hover td { background: var(--bg3); }
 
 <div class="topbar">
 
+  @if(session('firebase_role') === 'admin')
+  <a href="/admin" style="display:flex;align-items:center;gap:6px;padding:6px 13px;border-radius:7px;background:rgba(45,212,191,.1);border:1px solid rgba(45,212,191,.25);color:#2dd4bf;font-size:12px;font-weight:700;text-decoration:none;flex-shrink:0;transition:all .18s ease;">
+    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    لوحة التحكم
+  </a>
+  <div class="topbar-sep"></div>
+  @endif
+
   <a href="/" class="logo">
 
     <div class="logo-mark">

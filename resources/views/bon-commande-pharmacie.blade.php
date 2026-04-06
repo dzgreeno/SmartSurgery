@@ -96,14 +96,14 @@ table.data-table td input:focus{background-color:#e6f2ff;}
 <body>
 
 <div class="topbar">
-  <a href="/surgery/women" class="back-btn">
-    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-    جراحة النساء
+  <a href="javascript:history.back()" class="back-btn">
+    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    الرجوع
   </a>
   <div class="sep"></div>
   <div>
     <div class="tb-title">Bon de Commande Pharmacie</div>
-    <div class="tb-sub">وصل طلبية الصيدلية — قسم جراحة النساء</div>
+    <div class="tb-sub">مستشفى عاشور زيان</div>
   </div>
   <div class="sp"></div>
   <button class="btn-print" onclick="window.print()">
