@@ -150,6 +150,11 @@ Route::middleware(['firebase'])->group(function () {
         // إدارة المستخدمين (CRUD — البيانات تُدار عبر JS + Firebase RTDB)
         Route::resource('admin/users', FirebaseUserController::class);
 
+        // أرشيف الوثائق
+        Route::get('/admin/archives', function () {
+            return view('admin.archives');
+        })->name('admin.archives');
+
         // العمليات الجراحية
         Route::get('/admin/system-surgeries', function () {
             return view('admin.surgeries');
