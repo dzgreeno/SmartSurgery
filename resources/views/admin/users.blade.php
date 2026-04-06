@@ -15,10 +15,22 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text)}
 
+.sidebar{position:fixed;top:0;right:0;width:var(--sidebar);height:100vh;background:var(--bg2);border-left:1px solid var(--border);display:flex;flex-direction:column;z-index:100;overflow-y:auto;}
+.sidebar-brand{padding:20px 16px;border-bottom:1px solid var(--border);}
+.sidebar-brand h2{font-size:16px;font-weight:800;color:var(--accent);display:flex;align-items:center;gap:8px;}
+.user-info{margin-top:10px;padding:10px;background:var(--bg3);border-radius:var(--r);border:1px solid var(--border);}
+.user-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#0891b2);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#0d1117;margin-bottom:6px;}
+.user-name{font-size:13px;font-weight:700;}
+.user-role{font-size:11px;color:var(--gold);background:rgba(240,180,41,.12);padding:2px 8px;border-radius:20px;display:inline-block;margin-top:2px;}
+.user-email{font-size:10px;color:var(--muted);}
+.nav-section{padding:12px 8px 4px;font-size:10px;color:var(--muted);font-weight:700;letter-spacing:1px;}
+.nav-link{display:flex;align-items:center;gap:10px;padding:10px 16px;font-size:13px;font-weight:600;color:var(--muted);text-decoration:none;border-radius:var(--r);margin:2px 8px;transition:all var(--t);}
+.nav-link:hover{background:var(--bg3);color:var(--text);}
+.nav-link.active{background:var(--accent2);color:var(--accent);}
+.sidebar-footer{margin-top:auto;padding:16px;border-top:1px solid var(--border);}
+.btn-logout{width:100%;padding:10px;background:rgba(248,81,73,.1);border:1px solid rgba(248,81,73,.2);color:var(--red);border-radius:var(--r);font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all var(--t);}
 .btn-logout:hover{background:rgba(248,81,73,.2);}
-</style>
-@include('partials.sidebar')
-<style>
+
 .main-wrap{margin-right:var(--sidebar);min-height:100vh;display:flex;flex-direction:column;}
 .topbar{height:var(--topbar);background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:50;}
 .topbar-title{font-size:16px;font-weight:800;}
@@ -59,6 +71,7 @@ tr:hover td{background:var(--bg3);}
 </head>
 <body>
 
+@include('components.admin-sidebar', ['active' => 'users'])
 
 <div class="main-wrap">
   <div class="topbar">

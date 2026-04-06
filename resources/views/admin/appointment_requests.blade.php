@@ -17,11 +17,24 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text)}
 
+/* Sidebar */
+.sidebar {
+  position: fixed; top: 0; right: 0;
+  width: var(--sidebar); height: 100vh;
+  background: var(--bg2); border-left: 1px solid var(--border);
+  display: flex; flex-direction: column; z-index: 100; overflow-y: auto;
+}
+.sidebar-brand { padding: 20px 16px; border-bottom: 1px solid var(--border); }
+.sidebar-brand h2 { font-size: 16px; font-weight: 800; color: var(--accent); }
+.nav-link {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 16px; font-size: 13px; font-weight: 600;
+  color: var(--muted); text-decoration: none;
+  border-radius: var(--r); margin: 2px 8px; transition: all var(--t);
+}
 .nav-link:hover { background: var(--bg3); color: var(--text); }
 .nav-link.active { background: var(--accent2); color: var(--accent); }
-</style>
-@include('partials.sidebar')
-<style>
+
 /* Main */
 .main-wrap { margin-right: var(--sidebar); min-height: 100vh; display: flex; flex-direction: column; }
 .topbar {
@@ -62,6 +75,7 @@ tr:hover { background: rgba(255,255,255,.02); }
 </head>
 <body>
 
+@include('components.admin-sidebar', ['active' => 'appointments'])
 
 @php
     $role = session('firebase_role', 'admin');
