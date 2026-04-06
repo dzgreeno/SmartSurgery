@@ -84,9 +84,22 @@ tr:hover { background: rgba(255,255,255,.02); }
   </div>
 </aside>
 
+@php
+    $role = session('firebase_role', 'admin');
+    $deptFilter = '';
+    switch($role) {
+        case 'head_women': $deptFilter = 'جراحة النساء'; break;
+        case 'head_men': $deptFilter = 'جراحة الرجال'; break;
+        case 'head_orthopedics': $deptFilter = 'جراحة العظام'; break;
+        case 'head_maternity': $deptFilter = 'الأمومة'; break;
+    }
+@endphp
+
 <div class="main-wrap">
   <div class="topbar">
-    <span style="font-weight:700;">إدارة طلبات المواعيد</span>
+    <span style="font-weight:700;">إدارة طلبات المواعيد
+      @if($deptFilter) ({{ $deptFilter }}) @endif
+    </span>
     <a href="{{ route('home') }}" style="color:var(--accent);text-decoration:none;font-size:13px;font-weight:700;">العودة للموقع 🌍</a>
   </div>
 
@@ -129,6 +142,7 @@ const app = initializeApp({
 });
 const db = getDatabase(app);
 const listEl = document.getElementById('requests-list');
+const DEPT_FILTER = '{{ $deptFilter }}';
 
 onValue(ref(db, 'appointments/requests'), (snapshot) => {
   listEl.innerHTML = '';
@@ -138,7 +152,13 @@ onValue(ref(db, 'appointments/requests'), (snapshot) => {
   }
 
   const data = snapshot.val();
-  const reqs = Object.keys(data).map(k => ({id: k, ...data[k]})).filter(r => r.status === 'Pending').sort((a,b) => b.createdAt - a.createdAt);
+  const reqs = Object.keys(data).map(k => ({id: k, ...data[k]}))
+      .filter(r => r.status === 'Pending')
+      .filter(r => {
+          if(!DEPT_FILTER) return true; // Admin sees all
+          return r.department && r.department.includes(DEPT_FILTER);
+      })
+      .sort((a,b) => b.createdAt - a.createdAt);
 
   if(reqs.length === 0) {
     listEl.innerHTML = `<tr><td colspan="7" class="empty-state"><div class="icon">✅</div><text>تمت معالجة جميع الطلبات.</text></td></tr>`;

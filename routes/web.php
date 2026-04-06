@@ -128,12 +128,24 @@ Route::middleware(['firebase'])->group(function () {
         $role = session('firebase_role', 'user');
         switch ($role) {
             case 'admin': return redirect()->route('admin.dashboard');
-            case 'head_women': case 'staff_women': return redirect()->route('surgery.women');
-            case 'head_men': case 'staff_men': return redirect()->route('surgery.men');
             case 'doctor': return redirect()->route('doctor');
+            case 'head_women': case 'staff_women': 
+            case 'head_men': case 'staff_men': 
+            case 'head_orthopedics': case 'head_maternity': 
+            case 'nurse':
+                return redirect()->route('role.dashboard');
             default: return redirect()->route('home');
         }
     })->name('dashboard');
+
+    /*
+    |----------------------------------------------------------------------
+    | 👤 General Role Dashboard
+    |----------------------------------------------------------------------
+    */
+    Route::get('/my-dashboard', function () {
+        return view('role-dashboard');
+    })->name('role.dashboard');
 
     /*
     |----------------------------------------------------------------------
@@ -172,13 +184,20 @@ Route::middleware(['firebase'])->group(function () {
 
         Route::post('/admin/demands/{id}/status', [DemandController::class, 'updateStatus'])->name('admin.demands.status');
 
+        // جدول المناوبة الطبية للمختصين (يديرها المدير فقط)
+        Route::get('/planning-garde', fn() => view('planning-garde'))->name('planning-garde');
+    });
+
+    /*
+    |----------------------------------------------------------------------
+    | مشتركة (المدير ورؤساء المصالح)
+    |----------------------------------------------------------------------
+    */
+    Route::middleware(['firebase:admin,head_women,head_men,head_orthopedics,head_maternity'])->group(function () {
         // طلبات حجز المواعيد الجديدة (نظام Firebase)
         Route::get('/admin/appointment-requests', function () {
             return view('admin.appointment_requests');
         })->name('admin.appointment_requests');
-
-        // جدول المناوبة الطبية للمختصين (يديرها المدير فقط)
-        Route::get('/planning-garde', fn() => view('planning-garde'))->name('planning-garde');
     });
 
     /*
