@@ -226,6 +226,20 @@ html,body{height:100%;font-family:'Cairo',sans-serif;background:var(--bg);color:
     <a href="{{ route('daily-meds') }}" class="nav-link">
       <span class="nav-icon">💊</span> سجل الأدوية
     </a>
+
+    <div class="nav-section">الوثائق والجداول</div>
+    <a href="{{ route('planning-garde') }}" class="nav-link">
+      <span class="nav-icon">📅</span> جدول المناوبة
+    </a>
+    <a href="{{ route('bon-commande-pharmacie') }}" class="nav-link">
+      <span class="nav-icon">💊</span> وصل الصيدلية
+    </a>
+    <a href="{{ route('mouvement-personnel') }}" class="nav-link">
+      <span class="nav-icon">👥</span> حركة العمال
+    </a>
+    <a href="{{ route('fiche-navette') }}" class="nav-link">
+      <span class="nav-icon">🚑</span> فيش نافيت
+    </a>
   </div>
 
   <div class="sidebar-footer">
@@ -324,6 +338,27 @@ html,body{height:100%;font-family:'Cairo',sans-serif;background:var(--bg);color:
         <div>
           <h4>قسم جراحة الرجال</h4>
           <p>دخول مباشر للقسم</p>
+        </div>
+      </a>
+      <a href="{{ route('planning-garde') }}" class="action-card">
+        <div class="action-card-icon">📅</div>
+        <div>
+          <h4>جدول المناوبة</h4>
+          <p>برنامج المناوبة للممارسين المختصين</p>
+        </div>
+      </a>
+      <a href="{{ route('bon-commande-pharmacie') }}" class="action-card">
+        <div class="action-card-icon">💊</div>
+        <div>
+          <h4>وصل طلبية الصيدلية</h4>
+          <p>Bon de Commande Pharmacie</p>
+        </div>
+      </a>
+      <a href="{{ route('mouvement-personnel') }}" class="action-card">
+        <div class="action-card-icon">👥</div>
+        <div>
+          <h4>جدول حركة العمال</h4>
+          <p>مناوبات الشبه طبي — جراحة النساء</p>
         </div>
       </a>
     </div>

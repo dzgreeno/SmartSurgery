@@ -166,6 +166,9 @@ Route::middleware(['firebase'])->group(function () {
         })->name('admin.demands');
 
         Route::post('/admin/demands/{id}/status', [DemandController::class, 'updateStatus'])->name('admin.demands.status');
+
+        // جدول المناوبة الطبية للمختصين (يديرها المدير فقط)
+        Route::get('/planning-garde', fn() => view('planning-garde'))->name('planning-garde');
     });
 
     /*
@@ -178,6 +181,7 @@ Route::middleware(['firebase'])->group(function () {
         Route::get('/fiche-navette', fn() => view('fiche-navette'))->name('fiche-navette');
         Route::get('/patient-movements', fn() => view('patient-movements'))->name('patient-movements');
         Route::get('/patient-journal', fn() => view('patient-journal'))->name('patient-journal');
+        Route::get('/bon-commande-pharmacie', fn() => view('bon-commande-pharmacie'))->name('bon-commande-pharmacie');
     });
 
     /*
@@ -217,6 +221,9 @@ Route::middleware(['firebase'])->group(function () {
         Route::get('/surgery/women/head', function () {
             return view('surgery-women');
         })->name('surgery.head_women');
+
+        // جدول حركة العمال (تديره رئيسة مصلحة جراحة النساء)
+        Route::get('/mouvement-personnel', fn() => view('mouvement-personnel'))->name('mouvement-personnel');
     });
 
     Route::middleware(['firebase:admin,head_men'])->group(function () {

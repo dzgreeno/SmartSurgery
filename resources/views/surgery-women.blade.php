@@ -1422,6 +1422,52 @@ tbody tr:hover td { background: var(--bg3); }
 
       </a>
 
+      <a href="{{ route('bon-commande-pharmacie') }}" class="nav-btn">
+
+        <div class="nav-icon">
+
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M9 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-6z"/><path d="M14 2v6h6"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>
+
+        </div>
+
+        <span>وصل الصيدلية</span>
+
+      </a>
+
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <div class="sidebar-section">
+
+      <div class="sidebar-label">الجداول</div>
+
+      <a href="{{ route('planning-garde') }}" class="nav-btn">
+
+        <div class="nav-icon">
+
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg>
+
+        </div>
+
+        <span>جدول المناوبة</span>
+
+      </a>
+
+@if(in_array(session('firebase_role', 'guest'), ['admin','head_women']))
+      <a href="{{ route('mouvement-personnel') }}" class="nav-btn">
+
+        <div class="nav-icon">
+
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+
+        </div>
+
+        <span>حركة العمال</span>
+
+      </a>
+@endif
+
     </div>
 
   </aside>
