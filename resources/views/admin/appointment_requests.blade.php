@@ -17,24 +17,11 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text)}
 
-/* Sidebar */
-.sidebar {
-  position: fixed; top: 0; right: 0;
-  width: var(--sidebar); height: 100vh;
-  background: var(--bg2); border-left: 1px solid var(--border);
-  display: flex; flex-direction: column; z-index: 100; overflow-y: auto;
-}
-.sidebar-brand { padding: 20px 16px; border-bottom: 1px solid var(--border); }
-.sidebar-brand h2 { font-size: 16px; font-weight: 800; color: var(--accent); }
-.nav-link {
-  display: flex; align-items: center; gap: 10px;
-  padding: 10px 16px; font-size: 13px; font-weight: 600;
-  color: var(--muted); text-decoration: none;
-  border-radius: var(--r); margin: 2px 8px; transition: all var(--t);
-}
 .nav-link:hover { background: var(--bg3); color: var(--text); }
 .nav-link.active { background: var(--accent2); color: var(--accent); }
-
+</style>
+@include('partials.sidebar')
+<style>
 /* Main */
 .main-wrap { margin-right: var(--sidebar); min-height: 100vh; display: flex; flex-direction: column; }
 .topbar {
@@ -75,14 +62,6 @@ tr:hover { background: rgba(255,255,255,.02); }
 </head>
 <body>
 
-<aside class="sidebar">
-  <div class="sidebar-brand"><h2>🏥 SmartSurgery</h2></div>
-  <div style="padding: 16px 0;">
-    <a href="{{ route('admin.dashboard') }}" class="nav-link"><span class="nav-icon">📊</span> لوحة التحكم</a>
-    <a href="{{ route('admin.appointment_requests') }}" class="nav-link active"><span class="nav-icon">📅</span> طلبات المواعيد</a>
-    <a href="{{ route('admin.demands') }}" class="nav-link"><span class="nav-icon">📋</span> طلبات العمليات</a>
-  </div>
-</aside>
 
 @php
     $role = session('firebase_role', 'admin');
@@ -129,7 +108,8 @@ tr:hover { background: rgba(255,255,255,.02); }
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, onValue, remove, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getDatabase, ref, onValue, remove, set, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const app = initializeApp({
   apiKey: "AIzaSyC5OtqME0D8t72QsEERdRXrCCKl0bZqEQk",
@@ -140,6 +120,7 @@ const app = initializeApp({
   messagingSenderId: "1083766099812",
   appId: "1:1083766099812:web:a6a0170fc323d579aff471"
 });
+const auth = getAuth(app);
 const db = getDatabase(app);
 const listEl = document.getElementById('requests-list');
 const DEPT_FILTER = '{{ $deptFilter }}';
@@ -191,9 +172,7 @@ window.confirmAppt = async (id) => {
 
   try {
     const rRef = ref(db, `appointments/requests/${id}`);
-    const snapshot = await new Promise((res) => {
-      onValue(rRef, snap => res(snap), {onlyOnce: true});
-    });
+    const snapshot = await get(rRef);
     
     if(snapshot.exists()) {
       const data = snapshot.val();
@@ -205,10 +184,12 @@ window.confirmAppt = async (id) => {
       // Remove from requests
       await remove(rRef);
       alert('تم التأكيد بنجاح ونقل الموعد إلى الجدول.');
+    } else {
+        alert('حدث خطأ: لم يتم العثور على الطلب.');
     }
   } catch (e) {
     console.error(e);
-    alert('حدث خطأ أثناء التأكيد.');
+    alert('حدث خطأ أثناء التأكيد. المرجو التحقق من الرصيد أو الصلاحيات.');
   }
 };
 

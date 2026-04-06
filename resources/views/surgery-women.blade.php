@@ -56,11 +56,9 @@
 
   --orange2:  rgba(210,153,34,.12);
 
-  --blue:     #58a6ff;
-
   --blue2:    rgba(88,166,255,.12);
 
-  --sidebar:  200px;
+  --sidebar:  240px;
 
   --topbar:   52px;
 
@@ -303,134 +301,50 @@ body {
 /* ═══════════════ BODY LAYOUT ═══════════════ */
 
 .body-wrap {
-
   display: flex;
-
   flex: 1;
-
   min-height: 0;
-
+  margin-right: var(--sidebar);
 }
 
 
 
 /* ═══════════════ SIDEBAR ═══════════════ */
 
-.sidebar {
-
-  width: var(--sidebar);
-
-  background: var(--bg2);
-
-  border-left: 1px solid var(--border);
-
-  display: flex;
-
-  flex-direction: column;
-
-  flex-shrink: 0;
-
-  position: sticky;
-
-  top: var(--topbar);
-
-  height: calc(100vh - var(--topbar));
-
-  overflow-y: auto;
-
-}
-
-.sidebar::-webkit-scrollbar { display: none; }
-
-
-
-.sidebar-section { padding: 14px 10px 6px; }
-
-.sidebar-label {
-
-  font-size: 9.5px; font-weight: 800;
-
-  color: var(--muted); letter-spacing: 1.2px;
-
-  text-transform: uppercase; padding: 0 6px 6px;
-
-}
-
-
-
-.nav-btn {
-
-  display: flex; align-items: center; gap: 9px;
-
-  padding: 8px 10px;
-
-  border-radius: var(--r);
-
-  color: var(--muted2);
-
-  font-size: 12.5px; font-weight: 500;
-
-  text-decoration: none; cursor: pointer;
-
-  background: none; border: none; font-family: inherit;
-
-  width: 100%; transition: all var(--t);
-
-  white-space: nowrap;
-
-}
-
-.nav-btn:hover { background: var(--bg3); color: var(--text); }
-
-.nav-btn.active {
-
-  background: var(--accent2);
-
-  color: var(--accent);
-
-  font-weight: 700;
-
-}
-
-.nav-btn .nav-icon {
-
-  width: 28px; height: 28px; border-radius: 7px;
-
-  display: flex; align-items: center; justify-content: center;
-
-  flex-shrink: 0;
-
-  background: var(--bg3);
-
-  transition: background var(--t);
-
-}
-
-.nav-btn.active .nav-icon { background: rgba(45,212,191,.15); }
-
-.nav-btn:hover .nav-icon { background: rgba(255,255,255,.06); }
-
-
-
-.nav-badge {
-
-  margin-right: auto;
-
-  background: var(--accent);
-
-  color: #0d1117;
-
-  font-size: 9px; font-weight: 800;
-
-  padding: 1px 6px; border-radius: 100px;
-
-  min-width: 18px; text-align: center;
-
-}
-
-
-
-.sidebar-divider { height: 1px; background: var(--border); margin: 8px 16px; }
+@section('sidebar_content')
+<div class="sidebar-section">
+  <div class="sidebar-label">القائمة الرئيسية</div>
+  <button class="nav-btn active" onclick="showPanel('panel-stats')">
+    <span class="nav-icon">📊</span>
+    <span>الإحصائيات العامة</span>
+  </button>
+  <button class="nav-btn" onclick="showPanel('panel-surgeons')">
+    <span class="nav-icon">👨‍⚕️</span>
+    <span>الطاقم الطبي</span>
+  </button>
+  <button class="nav-btn" onclick="showPanel('panel-schedule')">
+    <span class="nav-icon">📅</span>
+    <span>جدول العمل</span>
+  </button>
+  <button class="nav-btn" onclick="showPanel('panel-ops')">
+    <span class="nav-icon">🔪</span>
+    <span>قائمة العمليات</span>
+  </button>
+  <button class="nav-btn" onclick="showPanel('panel-patients'), loadPatientsList()">
+    <span class="nav-icon">📁</span>
+    <span>ملفات المرضى</span>
+  </button>
+</div>
+<div class="sidebar-divider"></div>
+<div class="sidebar-section">
+  <div class="sidebar-label">إجراءات سريعة</div>
+  <button class="nav-btn" onclick="openAddPatientModal()">
+    <span class="nav-icon">➕</span>
+    <span>إضافة مريض</span>
+  </button>
+</div>
+@endsection
+@include('partials.sidebar')
 
 
 
