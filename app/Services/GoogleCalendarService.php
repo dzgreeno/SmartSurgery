@@ -39,7 +39,7 @@ class GoogleCalendarService
         $base64UrlPayload = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($payload));
         $signatureInput = $base64UrlHeader . '.' . $base64UrlPayload;
 
-        $privateKey = $this->credentials['private_key'];
+        $privateKey = $this->cleanPrivateKey($this->credentials['private_key']);
         openssl_sign($signatureInput, $signature, $privateKey, 'SHA256');
         
         $base64UrlSignature = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($signature));
@@ -98,5 +98,40 @@ class GoogleCalendarService
         }
 
         return $response->json()['id'];
+    }
+
+    /**
+     * Clean a private key string to ensure it's a valid PEM format for OpenSSL
+     */
+    protected function cleanPrivateKey($key)
+    {
+        // 1. Convert literal \n sequences to actual newlines
+        $key = str_replace(['\\n', '\n'], "\n", $key);
+        
+        // 2. Remove any accidental whitespace/carriage returns
+        $key = trim($key);
+        
+        // 3. If the key is a single line (collapsed), re-wrap it properly
+        if (!str_contains($key, "\n") || str_contains($key, "  ")) {
+            $cleanContent = str_replace([
+                "-----BEGIN PRIVATE KEY-----", 
+                "-----END PRIVATE KEY-----", 
+                "\r", "\n", " "
+            ], "", $key);
+            
+            $key = "-----BEGIN PRIVATE KEY-----\n" 
+                 . chunk_split($cleanContent, 64, "\n") 
+                 . "-----END PRIVATE KEY-----";
+        }
+        
+        // 4. Ensure it has the headers correctly
+        if (!str_contains($key, '-----BEGIN PRIVATE KEY-----')) {
+            $key = "-----BEGIN PRIVATE KEY-----\n" . $key;
+        }
+        if (!str_contains($key, '-----END PRIVATE KEY-----')) {
+            $key = $key . "\n-----END PRIVATE KEY-----";
+        }
+
+        return $key;
     }
 }

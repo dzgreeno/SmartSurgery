@@ -32,20 +32,8 @@ class FirebaseService
             $decoded = json_decode($credJson, true);
             
             if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-                // Exhaustive Fix for OpenSSL on Vercel/Heroku
                 if (isset($decoded['private_key'])) {
-                    $key = $decoded['private_key'];
-                    // Remove any accidental escapes and normalize newlines
-                    $key = str_replace(['\\n', '\n'], "\n", $key);
-                    $key = trim($key);
-                    
-                    // If the key is one giant line (broken PEM), we re-wrap it properly
-                    if (!str_contains($key, "\n") || str_contains($key, "  ")) {
-                        $cleanKey = str_replace(["-----BEGIN PRIVATE KEY-----", "-----END PRIVATE KEY-----", "\r", "\n", " "], "", $key);
-                        $key = "-----BEGIN PRIVATE KEY-----\n" . chunk_split($cleanKey, 64, "\n") . "-----END PRIVATE KEY-----\n";
-                    }
-                    
-                    $decoded['private_key'] = $key;
+                    $decoded['private_key'] = $this->cleanPrivateKey($decoded['private_key']);
                 }
                 $factory = $factory->withServiceAccount($decoded);
             } else {
@@ -101,5 +89,40 @@ class FirebaseService
         }
 
         return $this->database;
+    }
+
+    /**
+     * Clean a private key string to ensure it's a valid PEM format for OpenSSL
+     */
+    protected function cleanPrivateKey($key)
+    {
+        // 1. Convert literal \n sequences to actual newlines
+        $key = str_replace(['\\n', '\n'], "\n", $key);
+        
+        // 2. Remove any accidental whitespace/carriage returns
+        $key = trim($key);
+        
+        // 3. If the key is a single line (collapsed), re-wrap it
+        if (!str_contains($key, "\n") || str_contains($key, "  ")) {
+            $cleanContent = str_replace([
+                "-----BEGIN PRIVATE KEY-----", 
+                "-----END PRIVATE KEY-----", 
+                "\r", "\n", " "
+            ], "", $key);
+            
+            $key = "-----BEGIN PRIVATE KEY-----\n" 
+                 . chunk_split($cleanContent, 64, "\n") 
+                 . "-----END PRIVATE KEY-----";
+        }
+        
+        // 4. Ensure it has the headers correctly
+        if (!str_contains($key, '-----BEGIN PRIVATE KEY-----')) {
+            $key = "-----BEGIN PRIVATE KEY-----\n" . $key;
+        }
+        if (!str_contains($key, '-----END PRIVATE KEY-----')) {
+            $key = $key . "\n-----END PRIVATE KEY-----";
+        }
+
+        return $key;
     }
 }
