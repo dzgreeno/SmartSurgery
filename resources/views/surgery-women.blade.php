@@ -1395,27 +1395,10 @@ tbody tr:hover td { background: var(--bg3); }
       <div class="sidebar-label">السجلات</div>
 
       <a href="{{ route('daily-meds') }}" class="nav-btn">
-
         <div class="nav-icon">
-
           <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>
-
         </div>
-
         <span>سجل الأدوية</span>
-
-      </a>
-
-      <a href="{{ route('fiche-navette') }}" class="nav-btn">
-
-        <div class="nav-icon">
-
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-
-        </div>
-
-        <span>فيش نافيت</span>
-
       </a>
 
       <a href="{{ route('patient-movements') }}" class="nav-btn">
@@ -1430,52 +1413,41 @@ tbody tr:hover td { background: var(--bg3); }
 
       </a>
 
-      <a href="{{ route('bon-commande-pharmacie') }}" class="nav-btn">
-
-        <div class="nav-icon">
-
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M9 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-6z"/><path d="M14 2v6h6"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>
-
-        </div>
-
-        <span>وصل الصيدلية</span>
-
       </a>
-
     </div>
 
     <div class="sidebar-divider"></div>
 
     <div class="sidebar-section">
-
-      <div class="sidebar-label">الجداول</div>
+      <div class="sidebar-label">الوثائق والجداول</div>
 
       <a href="{{ route('planning-garde') }}" class="nav-btn">
-
         <div class="nav-icon">
-
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg>
-
+          <span style="font-size:14px;color:rgba(45,212,191,1)">📅</span>
         </div>
-
         <span>جدول المناوبة</span>
-
       </a>
 
-@if(in_array(session('firebase_role', 'guest'), ['admin','head_women']))
-      <a href="{{ route('mouvement-personnel') }}" class="nav-btn">
-
+      <a href="{{ route('bon-commande-pharmacie') }}" class="nav-btn">
         <div class="nav-icon">
-
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-
+          <span style="font-size:14px;color:rgba(240,180,41,1)">💊</span>
         </div>
-
-        <span>حركة العمال</span>
-
+        <span>وصل الصيدلية</span>
       </a>
-@endif
 
+      <a href="{{ route('mouvement-personnel') }}" class="nav-btn">
+        <div class="nav-icon">
+          <span style="font-size:14px;color:rgba(63,185,80,1)">👥</span>
+        </div>
+        <span>حركة العمال</span>
+      </a>
+
+      <a href="{{ route('fiche-navette') }}" class="nav-btn">
+        <div class="nav-icon">
+          <span style="font-size:14px;color:rgba(139,92,246,1)">🚑</span>
+        </div>
+        <span>فيش نافيت</span>
+      </a>
     </div>
 
   </aside>
