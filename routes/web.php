@@ -183,6 +183,7 @@ Route::middleware(['firebase'])->group(function () {
         })->name('admin.demands');
 
         Route::post('/admin/demands/{id}/status', [DemandController::class, 'updateStatus'])->name('admin.demands.status');
+        Route::post('/admin/demands/{id}/confirm', [DemandController::class, 'confirmAppointment'])->name('admin.demands.confirm');
 
         // جدول المناوبة الطبية للمختصين (يديرها المدير فقط)
         Route::get('/planning-garde', fn() => view('planning-garde'))->name('planning-garde');

@@ -40,6 +40,20 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:var(--bg3);}
 .info-box .icon{font-size:48px;margin-bottom:12px;}
 .info-box p{font-size:14px;line-height:1.8;}
 select.status-select{padding:6px 10px;background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:6px;font-family:'Cairo',sans-serif;font-size:12px;cursor:pointer;}
+.btn-confirm{background:rgba(45,212,191,.15);border:1px solid rgba(45,212,191,.3);color:var(--accent);padding:6px 12px;border-radius:6px;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;cursor:pointer;margin-right:8px;}
+.btn-confirm:hover{background:var(--accent);color:#0d1117;}
+
+/* Modal Styles */
+.modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:999;align-items:center;justify-content:center;}
+.modal-overlay.active{display:flex;}
+.modal-content{background:var(--bg2);width:400px;border-radius:12px;padding:24px;border:1px solid var(--border);box-shadow:0 10px 30px rgba(0,0,0,0.5);}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
+.modal-header h3{font-size:16px;color:var(--accent);}
+.close-btn{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;}
+.form-group{margin-bottom:15px;}
+.form-group label{display:block;font-size:13px;margin-bottom:6px;color:var(--text);}
+.form-group input{width:100%;padding:10px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-family:'Cairo',sans-serif;}
+.btn-submit{width:100%;background:var(--accent);color:#0d1117;border:none;padding:12px;border-radius:6px;font-family:'Cairo',sans-serif;font-weight:800;cursor:pointer;margin-top:10px;}
 </style>
 </head>
 <body>
@@ -104,9 +118,11 @@ select.status-select{padding:6px 10px;background:var(--bg3);border:1px solid var
                   <option value="">— تغيير —</option>
                   <option value="approved">✅ قبول</option>
                   <option value="rejected">❌ رفض</option>
-                  <option value="scheduled">📅 جدولة</option>
                 </select>
               </form>
+              @if($d->status != 'scheduled')
+                <button type="button" class="btn-confirm" onclick="openConfirmModal({{ $d->id }}, '{{ $d->patient_name }}')">📅 تأكيد الموعد</button>
+              @endif
             </td>
           </tr>
           @endforeach
@@ -116,5 +132,47 @@ select.status-select{padding:6px 10px;background:var(--bg3);border:1px solid var
     @endif
   </div>
 </div>
+
+<!-- Modal Date and Time -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>📅 تحديد موعد العملية النهائي</h3>
+      <button class="close-btn" onclick="closeConfirmModal()">&times;</button>
+    </div>
+    <p id="modalPatientName" style="font-size:13px;color:var(--muted);margin-bottom:15px;"></p>
+    <form id="confirmForm" method="POST" action="">
+      @csrf
+      <div class="form-group">
+        <label>تاريخ الموعد</label>
+        <input type="date" name="confirmed_date" required>
+      </div>
+      <div class="form-group">
+        <label>وقت الموعد</label>
+        <input type="time" name="confirmed_time" required>
+      </div>
+      <button type="submit" class="btn-submit">تأكيد وإرسال إشعار للمريض</button>
+    </form>
+  </div>
+</div>
+
+<script>
+function openConfirmModal(id, name) {
+    const modal = document.getElementById('confirmModal');
+    const form = document.getElementById('confirmForm');
+    const nameLabel = document.getElementById('modalPatientName');
+    
+    // Set form action dynamic
+    form.action = `/admin/demands/${id}/confirm`;
+    nameLabel.innerText = 'المريض: ' + name;
+    
+    modal.classList.add('active');
+}
+
+function closeConfirmModal() {
+    document.getElementById('confirmModal').classList.remove('active');
+}
+</script>
+
 </body>
 </html>

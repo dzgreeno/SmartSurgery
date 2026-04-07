@@ -72,6 +72,12 @@ background:#1a5dc9;
 <label>الاسم الكامل</label>
 <input type="text" name="name" required>
 
+<label>البريد الإلكتروني (لاستقبال رسالة التأكيد)</label>
+<input type="email" name="patient_email" required>
+
+<label>رقم الهاتف (اختياري)</label>
+<input type="tel" name="patient_phone">
+
 <label>نوع العملية</label>
 <input type="text" name="type" required>
 
