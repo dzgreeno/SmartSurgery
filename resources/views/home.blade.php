@@ -830,6 +830,7 @@ footer{background:linear-gradient(135deg,#071e26,#0b3c49);padding:60px 48px 0}
         <div class="fg"><label>اللقب</label><input type="text" id="lname" placeholder="بن علي"></div>
       </div>
       <div class="fg"><label>رقم الهاتف</label><input type="tel" id="fphone" placeholder="0555 000 000"></div>
+      <div class="fg"><label>البريد الإلكتروني (لاستلام التأكيد)</label><input type="email" id="femail" placeholder="example@email.com"></div>
       <div class="fg">
         <label>التخصص المطلوب</label>
         <select id="fspec">
@@ -1029,10 +1030,11 @@ function generateCaptcha() {
 document.addEventListener('DOMContentLoaded', generateCaptcha);
 
 document.getElementById('btn-submit-booking').addEventListener('click', async function() {
-  const fields = [
+    const fields = [
     document.getElementById('fname'),
     document.getElementById('lname'),
     document.getElementById('fphone'),
+    document.getElementById('femail'),
     document.getElementById('fspec'),
     document.getElementById('fdate'),
   ];
@@ -1063,23 +1065,37 @@ document.getElementById('btn-submit-booking').addEventListener('click', async fu
     btn.disabled = true;
 
     try {
-      const newReqRef = push(ref(db, 'appointments/requests'));
-      await set(newReqRef, {
-        fname: document.getElementById('fname').value,
-        lname: document.getElementById('lname').value,
-        phone: document.getElementById('fphone').value,
-        department: document.getElementById('fspec').value,
-        date: document.getElementById('fdate').value,
-        status: "Pending",
-        createdAt: serverTimestamp()
+      // Send to Laravel Backend instead of Firebase
+      const formData = new FormData();
+      formData.append('fname', document.getElementById('fname').value);
+      formData.append('lname', document.getElementById('lname').value);
+      formData.append('patient_phone', document.getElementById('fphone').value);
+      formData.append('patient_email', document.getElementById('femail').value);
+      formData.append('type', document.getElementById('fspec').value);
+      formData.append('date', document.getElementById('fdate').value);
+      formData.append('_token', '{{ csrf_token() }}');
+
+      const response = await fetch('/demands', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        }
       });
-      alert('✅ تم استلام طلب الحجز بنجاح! وسيتواصل فريقنا معك قريبًا لتأكيد الموعد.');
-      fields.forEach(inp => inp.value = '');
-      captchaInput.value = '';
-      generateCaptcha();
+
+      const result = await response.json();
+
+      if (result.success) {
+        alert('✅ ' + result.message);
+        fields.forEach(inp => inp.value = '');
+        captchaInput.value = '';
+        generateCaptcha();
+      } else {
+        alert('❌ فشل إرسال الطلب: ' + (result.message || 'خطأ غير معروف'));
+      }
     } catch (err) {
       console.error(err);
-      alert('❌ حدث خطأ أثناء إرسال الطلب!');
+      alert('❌ حدث خطأ أثناء الاتصال بالخادم!');
     }
     btn.innerHTML = oldTxt;
     btn.disabled = false;

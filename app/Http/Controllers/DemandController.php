@@ -14,24 +14,33 @@ class DemandController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'nullable|string|max:255',
+            'fname' => 'nullable|string|max:255',
+            'lname' => 'nullable|string|max:255',
             'patient_email' => 'required|email|max:255',
             'patient_phone' => 'nullable|string|max:20',
             'type' => 'required|string|max:255',
-            'description' => 'required|string',
+            'description' => 'nullable|string',
             'date' => 'required|date',
         ]);
 
+        $fullName = $request->name ?: trim($request->fname . ' ' . $request->lname);
+        $description = $request->description ?: 'طلب موعد عبر الموقع الرسمي';
+
         Demand::create([
-            'patient_name' => $request->name,
+            'patient_name' => $fullName,
             'patient_email' => $request->patient_email,
             'patient_phone' => $request->patient_phone,
             'surgery_type' => $request->type,
-            'description' => $request->description,
+            'description' => $description,
             'requested_date' => $request->date,
             'status' => 'pending',
             'email_status' => 'not_sent',
         ]);
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => 'تم إرسال طلبك بنجاح. سيتم مراجعته من قبل الإدارة.']);
+        }
 
         return back()->with('success', 'تم إرسال طلبك بنجاح. سيتم مراجعته من قبل الإدارة.');
     }
