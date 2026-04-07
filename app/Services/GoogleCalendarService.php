@@ -2,33 +2,59 @@
 
 namespace App\Services;
 
-use Google_Client;
-use Google_Service_Calendar;
-use Google_Service_Calendar_Event;
-use Google_Service_Calendar_EventDateTime;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Support\Facades\Http;
 
 class GoogleCalendarService
 {
-    protected $client;
-    protected $service;
+    protected $credentials;
 
     public function __construct()
     {
-        $this->client = new Google_Client();
-        $this->client->setApplicationName("SmartSurgery Appointments");
-        $this->client->setScopes([Google_Service_Calendar::CALENDAR_EVENTS]);
-        
         $credentialsPath = storage_path('app/google-calendar/credentials.json');
-        
         if (file_exists($credentialsPath)) {
-            $this->client->setAuthConfig($credentialsPath);
-            $this->service = new Google_Service_Calendar($this->client);
+            $this->credentials = json_decode(file_get_contents($credentialsPath), true);
         } else {
-            // Optional: Handle missing credentials gracefully rather than fatal error
-            $this->service = null;
+            $this->credentials = null;
         }
+    }
+
+    protected function getAccessToken()
+    {
+        if (!$this->credentials) {
+            throw new Exception("Google Calendar credentials not found.");
+        }
+
+        $header = json_encode(['alg' => 'RS256', 'typ' => 'JWT']);
+        $payload = json_encode([
+            'iss' => $this->credentials['client_email'],
+            'scope' => 'https://www.googleapis.com/auth/calendar.events',
+            'aud' => 'https://oauth2.googleapis.com/token',
+            'exp' => time() + 3600,
+            'iat' => time(),
+        ]);
+
+        $base64UrlHeader = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($header));
+        $base64UrlPayload = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($payload));
+        $signatureInput = $base64UrlHeader . '.' . $base64UrlPayload;
+
+        $privateKey = $this->credentials['private_key'];
+        openssl_sign($signatureInput, $signature, $privateKey, 'SHA256');
+        
+        $base64UrlSignature = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($signature));
+        $jwt = $signatureInput . '.' . $base64UrlSignature;
+
+        $response = Http::asForm()->post('https://oauth2.googleapis.com/token', [
+            'grant_type' => 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+            'assertion' => $jwt,
+        ]);
+
+        if ($response->failed()) {
+            throw new Exception("Failed to get Google access token: " . $response->body());
+        }
+
+        return $response->json()['access_token'];
     }
 
     /**
@@ -36,38 +62,41 @@ class GoogleCalendarService
      */
     public function createAppointmentEvent($demand)
     {
-        if (!$this->service) {
-            throw new Exception("Google Calendar credentials not found.");
-        }
-
-        // Calendar ID from env or fallback to primary
+        $accessToken = $this->getAccessToken();
+        
         $calendarId = env('GOOGLE_CALENDAR_ID', 'primary');
         
         $startDateTime = Carbon::parse($demand->confirmed_date . ' ' . $demand->confirmed_time)->format(Carbon::RFC3339);
-        // Assuming typical appointment takes 1 hour
         $endDateTime = Carbon::parse($demand->confirmed_date . ' ' . $demand->confirmed_time)->addHour()->format(Carbon::RFC3339);
 
-        $event = new Google_Service_Calendar_Event([
+        // Map to Google Calendar Event logic
+        $eventData = [
             'summary' => 'موعد طبي: ' . $demand->patient_name,
             'description' => "مريض: {$demand->patient_name}\nالتخصص/العملية: {$demand->surgery_type}\nتأكيد عبر نظام SmartSurgery.",
-            'start' => new Google_Service_Calendar_EventDateTime([
+            'start' => [
                 'dateTime' => $startDateTime,
                 'timeZone' => env('APP_TIMEZONE', 'Africa/Algiers'),
-            ]),
-            'end' => new Google_Service_Calendar_EventDateTime([
+            ],
+            'end' => [
                 'dateTime' => $endDateTime,
                 'timeZone' => env('APP_TIMEZONE', 'Africa/Algiers'),
-            ]),
-        ]);
+            ],
+        ];
 
         if (!empty($demand->patient_email)) {
-            $event->setAttendees([
+            $eventData['attendees'] = [
                 ['email' => $demand->patient_email],
-            ]);
+            ];
         }
 
-        $createdEvent = $this->service->events->insert($calendarId, $event);
+        // POST request
+        $response = Http::withToken($accessToken)
+            ->post("https://www.googleapis.com/calendar/v3/calendars/{$calendarId}/events", $eventData);
 
-        return $createdEvent->getId();
+        if ($response->failed()) {
+            throw new Exception("Failed to create Google Calendar event: " . $response->body());
+        }
+
+        return $response->json()['id'];
     }
 }

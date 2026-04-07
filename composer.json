@@ -8,7 +8,6 @@
         "php": "^7.3|^8.0",
         "cloudinary-labs/cloudinary-laravel": "2.0.0",
         "fruitcake/laravel-cors": "^2.0",
-        "google/apiclient": "2.15.0",
         "google/cloud-firestore": "^1.41",
         "guzzlehttp/guzzle": "^7.0.1",
         "kreait/firebase-php": "^5.4",
@@ -44,11 +43,7 @@
             "@php artisan package:discover --ansi"
         ],
         "post-update-cmd": [
-            "Google\\Task\\Composer::cleanup",
             "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
-        ],
-        "post-install-cmd": [
-            "Google\\Task\\Composer::cleanup"
         ],
         "post-root-package-install": [
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
@@ -60,10 +55,7 @@
     "extra": {
         "laravel": {
             "dont-discover": []
-        },
-        "google/apiclient-services": [
-            "Calendar"
-        ]
+        }
     },
     "config": {
         "optimize-autoloader": true,
