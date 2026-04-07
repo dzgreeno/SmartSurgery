@@ -10,12 +10,10 @@ use Illuminate\Http\Request;
 
 class SurgeryController extends Controller
 {
-    // عرض جميع العمليات
+    // عرض جميع العمليات (Now powered by Firebase via JS, no SQLite DB calls)
     public function index()
     {
-        $surgeries = Surgery::latest()->get();
-        $departments = Department::where('type', 'surgery')->get();
-        return view('surgeries.index', compact('surgeries', 'departments'));
+        return view('admin.surgeries');
     }
 
     // حفظ عملية جديدة

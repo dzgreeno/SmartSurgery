@@ -4,24 +4,41 @@
     <div class="user-info">
       <div class="user-avatar">{{ mb_strtoupper(mb_substr(session('firebase_user.fname', 'م'), 0, 1)) }}</div>
       <div class="user-name">{{ session('firebase_user.fname') }} {{ session('firebase_user.lname') }}</div>
-      <div class="user-role">👑 مدير النظام</div>
+      <div class="user-role">
+        @if(session('firebase_role') === 'admin')
+            👑 مدير النظام
+        @elseif(session('firebase_role') === 'head_women')
+            👩‍⚕️ رئيسة مصلحة النساء
+        @elseif(session('firebase_role') === 'head_men')
+            👨‍⚕️ رئيس مصلحة الرجال
+        @elseif(session('firebase_role') === 'head_orthopedics')
+            🦴 رئيس مصلحة العظام
+        @elseif(session('firebase_role') === 'head_maternity')
+            🤱 رئيسة مصلحة الأمومة
+        @else
+            🩺 طاقم طبي
+        @endif
+      </div>
       <div class="user-email">{{ session('firebase_user.email') }}</div>
     </div>
   </div>
 
   <div style="padding: 8px 0; flex:1;">
     <div class="nav-section">الرئيسية</div>
-    <a href="{{ route('admin.dashboard') }}" class="nav-link {{ $active === 'dashboard' ? 'active' : '' }}">
+    <a href="{{ session('firebase_role') === 'admin' ? route('admin.dashboard') : route('role.dashboard') }}" class="nav-link {{ $active === 'dashboard' ? 'active' : '' }}">
       <span class="nav-icon">📊</span> لوحة التحكم
     </a>
     <a href="{{ route('home') }}" class="nav-link">
       <span class="nav-icon">🌐</span> الموقع الرئيسي
     </a>
 
+    @if(session('firebase_role') === 'admin')
     <div class="nav-section">إدارة المستخدمين</div>
     <a href="{{ route('users.index') }}" class="nav-link {{ $active === 'users' ? 'active' : '' }}">
       <span class="nav-icon">👥</span> المستخدمون
     </a>
+    @endif
+
 
     <div class="nav-section">العمليات والمواعيد</div>
     <a href="{{ route('admin.appointment_requests') }}" class="nav-link {{ $active === 'appointments' ? 'active' : '' }}">

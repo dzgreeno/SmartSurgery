@@ -757,22 +757,7 @@ footer{background:linear-gradient(135deg,#071e26,#0b3c49);padding:60px 48px 0}
   </div>
 </section>
 
-<!-- DOCTORS -->
-<section class="doctors-section">
-  <div style="max-width:1200px;margin:auto">
-    <div class="section-header reveal">
-      <span class="eyebrow">كادرنا الطبي</span>
-      <h2 class="section-title">أطباؤنا المتخصصون</h2>
-      <div class="section-line"></div>
-    </div>
-    <div class="doctors-grid">
-      <div class="doctor-card reveal"><div class="doctor-avatar">👩‍⚕️</div><div class="doctor-name">د. سارة خليل</div><div class="doctor-spec">جراحة النساء والتوليد</div><div class="doctor-stars">★★★★★</div><span class="doctor-exp">15 سنة خبرة</span></div>
-      <div class="doctor-card reveal"><div class="doctor-avatar">👩‍⚕️</div><div class="doctor-name">د. ليلى بوسلطان</div><div class="doctor-spec">أمراض النساء والتوليد</div><div class="doctor-stars">★★★★★</div><span class="doctor-exp">12 سنة خبرة</span></div>
-      <div class="doctor-card reveal"><div class="doctor-avatar">👨‍⚕️</div><div class="doctor-name">د. أحمد بن عمر</div><div class="doctor-spec">جراحة عامة</div><div class="doctor-stars">★★★★★</div><span class="doctor-exp">18 سنة خبرة</span></div>
-      <div class="doctor-card reveal"><div class="doctor-avatar">👩‍⚕️</div><div class="doctor-name">د. نسرين حمدان</div><div class="doctor-spec">طب الطوارئ والإنعاش</div><div class="doctor-stars">★★★★★</div><span class="doctor-exp">8 سنوات خبرة</span></div>
-    </div>
-  </div>
-</section>
+
 
 <!-- VIDEOS -->
 <section class="videos-section">
