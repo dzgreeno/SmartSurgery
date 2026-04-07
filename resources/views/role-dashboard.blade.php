@@ -45,6 +45,30 @@ body { font-family: 'Cairo', sans-serif; background: var(--bg); color: var(--tex
   transition: all var(--t);
 }
 .quick-link:hover { border-color: var(--accent); background: var(--accent2); transform: translateY(-2px); }
+
+.doc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+.doc-card {
+  display: flex; align-items: center; gap: 14px; padding: 18px 20px;
+  background: var(--bg3); border: 1px solid var(--border); border-radius: 12px;
+  text-decoration: none; color: var(--text); transition: all var(--t);
+  position: relative; overflow: hidden;
+}
+.doc-card::before {
+  content: ''; position: absolute; top: 0; right: 0; width: 4px; height: 100%;
+  border-radius: 0 12px 12px 0; transition: all var(--t);
+}
+.doc-card:hover { border-color: var(--accent); background: var(--accent2); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,.3); }
+.doc-card:hover::before { background: var(--accent); }
+.doc-card .doc-icon {
+  width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0;
+}
+.doc-card .doc-info h4 { font-size: 14px; font-weight: 800; margin-bottom: 2px; }
+.doc-card .doc-info p { font-size: 11px; color: var(--muted); font-weight: 500; }
+.doc-card.garde .doc-icon { background: rgba(45,212,191,.15); }
+.doc-card.pharma .doc-icon { background: rgba(240,180,41,.15); }
+.doc-card.mouvement .doc-icon { background: rgba(63,185,80,.15); }
+.doc-card.navette .doc-icon { background: rgba(139,92,246,.15); }
 </style>
 </head>
 <body>
@@ -125,10 +149,6 @@ body { font-family: 'Cairo', sans-serif; background: var(--bg); color: var(--tex
                 <a href="{{ route('patient-journal') }}" class="quick-link">📓 يوميات المريض</a>
             @endif
 
-            @if(in_array($role, ['head_women']))
-                <a href="{{ route('bon-commande-pharmacie') }}" class="quick-link">💊 طلبية الصيدلية</a>
-            @endif
-
             @if(in_array($role, ['head_women', 'head_men', 'head_orthopedics', 'head_maternity']))
                 <a href="{{ route('admin.appointment_requests') }}" class="quick-link" style="background:var(--accent2); border-color:var(--accent);">📅 طلبات حجز المواعيد</a>
             @endif
@@ -136,6 +156,50 @@ body { font-family: 'Cairo', sans-serif; background: var(--bg); color: var(--tex
         </div>
     </div>
 </div>
+
+{{-- ═══════════════ الوثائق والجداول ═══════════════ --}}
+@if(in_array($role, ['head_women', 'head_men', 'head_orthopedics', 'head_maternity']))
+<div class="card">
+    <div class="card-head">📄 الوثائق والجداول</div>
+    <div class="card-body">
+        <div class="doc-grid">
+
+            <a href="{{ route('planning-garde') }}" class="doc-card garde">
+                <div class="doc-icon">📅</div>
+                <div class="doc-info">
+                    <h4>جدول المناوبة</h4>
+                    <p>إدارة جدول المناوبة الطبية</p>
+                </div>
+            </a>
+
+            <a href="{{ route('bon-commande-pharmacie') }}" class="doc-card pharma">
+                <div class="doc-icon">💊</div>
+                <div class="doc-info">
+                    <h4>وصل الصيدلية</h4>
+                    <p>طلبيات وأوامر الصيدلية</p>
+                </div>
+            </a>
+
+            <a href="{{ route('mouvement-personnel') }}" class="doc-card mouvement">
+                <div class="doc-icon">👥</div>
+                <div class="doc-info">
+                    <h4>حركة العمال</h4>
+                    <p>تتبع حركة ونقل العمال</p>
+                </div>
+            </a>
+
+            <a href="{{ route('fiche-navette') }}" class="doc-card navette">
+                <div class="doc-icon">🚑</div>
+                <div class="doc-info">
+                    <h4>فيش نافيت</h4>
+                    <p>وثائق نقل المرضى</p>
+                </div>
+            </a>
+
+        </div>
+    </div>
+</div>
+@endif
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";

@@ -176,11 +176,7 @@ Route::middleware(['firebase'])->group(function () {
             return view('admin.demands');
         })->name('admin.demands');
 
-        Route::post('/admin/demands/confirm-firebase', [DemandController::class, 'confirmFirebaseAppt'])->name('admin.confirm_firebase');
         Route::post('/admin/demands/{id}/confirm', [DemandController::class, 'confirmAppointment'])->name('admin.demands.confirm');
-
-        // جدول المناوبة الطبية للمختصين (يديرها المدير فقط)
-        Route::get('/planning-garde', fn() => view('planning-garde'))->name('planning-garde');
     });
 
     /*
@@ -193,6 +189,14 @@ Route::middleware(['firebase'])->group(function () {
         Route::get('/admin/appointment-requests', function () {
             return view('admin.appointment_requests');
         })->name('admin.appointment_requests');
+
+        // تأكيد المواعيد
+        Route::post('/admin/demands/confirm-firebase', [DemandController::class, 'confirmFirebaseAppt'])->name('admin.confirm_firebase');
+
+        // الوثائق والجداول المشتركة لرؤساء المصالح
+        Route::get('/planning-garde', fn() => view('planning-garde'))->name('planning-garde');
+        Route::get('/mouvement-personnel', fn() => view('mouvement-personnel'))->name('mouvement-personnel');
+        Route::get('/bon-commande-pharmacie', fn() => view('bon-commande-pharmacie'))->name('bon-commande-pharmacie');
     });
 
     /*
@@ -202,10 +206,13 @@ Route::middleware(['firebase'])->group(function () {
     */
     Route::middleware(['firebase:admin,head_women,staff_women,doctor'])->group(function () {
         Route::get('/surgery/women', fn() => view('surgery-women'))->name('surgery.women');
-        Route::get('/fiche-navette', fn() => view('fiche-navette'))->name('fiche-navette');
         Route::get('/patient-movements', fn() => view('patient-movements'))->name('patient-movements');
         Route::get('/patient-journal', fn() => view('patient-journal'))->name('patient-journal');
-        Route::get('/bon-commande-pharmacie', fn() => view('bon-commande-pharmacie'))->name('bon-commande-pharmacie');
+    });
+
+    // فيش نافيت — متاح لجميع رؤساء المصالح + طاقم النساء + الأطباء
+    Route::middleware(['firebase:admin,head_women,head_men,head_orthopedics,head_maternity,staff_women,doctor'])->group(function () {
+        Route::get('/fiche-navette', fn() => view('fiche-navette'))->name('fiche-navette');
     });
 
     /*
@@ -245,9 +252,6 @@ Route::middleware(['firebase'])->group(function () {
         Route::get('/surgery/women/head', function () {
             return view('surgery-women');
         })->name('surgery.head_women');
-
-        // جدول حركة العمال (تديره رئيسة مصلحة جراحة النساء)
-        Route::get('/mouvement-personnel', fn() => view('mouvement-personnel'))->name('mouvement-personnel');
     });
 
     Route::middleware(['firebase:admin,head_men'])->group(function () {

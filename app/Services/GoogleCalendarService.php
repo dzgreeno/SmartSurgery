@@ -101,37 +101,33 @@ class GoogleCalendarService
     }
 
     /**
-     * Clean a private key string to ensure it's a valid PEM format for OpenSSL
+     * Clean a private key string to ensure it's a valid PEM format for OpenSSL.
+     * Handles keys from JSON files, env vars (with literal \n), and base64 encoded sources.
      */
     protected function cleanPrivateKey($key)
     {
-        // 1. Convert literal \n sequences to actual newlines
-        $key = str_replace(['\\n', '\n'], "\n", $key);
-        
-        // 2. Remove any accidental whitespace/carriage returns
+        // 1. Convert ALL possible literal \n representations to actual newlines
+        $key = str_replace('\\n', "\n", $key);
+        $key = str_replace('\r', '', $key);
         $key = trim($key);
-        
-        // 3. If the key is a single line (collapsed), re-wrap it properly
-        if (!str_contains($key, "\n") || str_contains($key, "  ")) {
-            $cleanContent = str_replace([
-                "-----BEGIN PRIVATE KEY-----", 
-                "-----END PRIVATE KEY-----", 
-                "\r", "\n", " "
-            ], "", $key);
-            
-            $key = "-----BEGIN PRIVATE KEY-----\n" 
-                 . chunk_split($cleanContent, 64, "\n") 
-                 . "-----END PRIVATE KEY-----";
-        }
-        
-        // 4. Ensure it has the headers correctly
-        if (!str_contains($key, '-----BEGIN PRIVATE KEY-----')) {
-            $key = "-----BEGIN PRIVATE KEY-----\n" . $key;
-        }
-        if (!str_contains($key, '-----END PRIVATE KEY-----')) {
-            $key = $key . "\n-----END PRIVATE KEY-----";
+
+        // 2. Strip the PEM headers/footers
+        $cleanContent = str_replace('-----BEGIN PRIVATE KEY-----', '', $key);
+        $cleanContent = str_replace('-----END PRIVATE KEY-----', '', $cleanContent);
+
+        // 3. Remove ALL whitespace (newlines, spaces, tabs, carriage returns)
+        $cleanContent = preg_replace('/\s+/', '', $cleanContent);
+
+        // 4. Validate we have base64 content
+        if (empty($cleanContent)) {
+            return $key;
         }
 
-        return $key;
+        // 5. Rebuild proper PEM format with 64-char line wrapping
+        $formatted = "-----BEGIN PRIVATE KEY-----\n"
+                   . wordwrap($cleanContent, 64, "\n", true)
+                   . "\n-----END PRIVATE KEY-----";
+
+        return $formatted;
     }
 }

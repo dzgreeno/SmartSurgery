@@ -195,6 +195,25 @@ window.confirmAppt = async (id) => {
   
   if(!cDate || !cTime) return;
 
+  // 1. Update Firebase directly from client-side (PRIMARY - avoids server-side OpenSSL issues)
+  try {
+    const confirmedData = {
+      ...data,
+      status: 'Confirmed',
+      exactTime: cTime,
+      confirmed_date: cDate,
+      confirmed_time: cTime,
+      updatedAt: Date.now()
+    };
+    await set(ref(db, `appointments/confirmed/${id}`), confirmedData);
+    await remove(rRef);
+  } catch (fbErr) {
+    console.error('Firebase client-side update failed:', fbErr);
+    alert('❌ حدث خطأ أثناء تحديث قاعدة البيانات.');
+    return;
+  }
+
+  // 2. Notify server for Email + Google Calendar (non-blocking)
   try {
     const response = await fetch('/admin/demands/confirm-firebase', {
       method: 'POST',
@@ -217,14 +236,17 @@ window.confirmAppt = async (id) => {
 
     const result = await response.json();
     if(result.success) {
-      alert('✅ ' + result.message);
-      // Data in Firebase is already updated by the PHP controller in my design
+      alert('✅ تم تأكيد الموعد بنجاح.' + 
+        (result.email_ok ? ' 📧 تم إرسال الإيميل.' : '') +
+        (result.calendar_ok ? ' 📅 تمت إضافته للتقويم.' : ''));
     } else {
-      alert('❌ فشل التأكيد: ' + result.message);
+      // Firebase was already updated client-side, so this is just a warning
+      alert('⚠️ تم تأكيد الموعد في قاعدة البيانات، لكن حدث خطأ في إرسال الإشعارات.');
     }
   } catch (e) {
-    console.error(e);
-    alert('حدث خطأ في الاتصال بالخادم.');
+    console.error('Server notification error:', e);
+    // Firebase update already succeeded client-side
+    alert('✅ تم تأكيد الموعد بنجاح.\n⚠️ قد لا يتم إرسال الإيميل أو التقويم (خطأ في الاتصال بالخادم).');
   }
 };
 
