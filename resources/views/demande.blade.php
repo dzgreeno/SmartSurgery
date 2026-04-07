@@ -56,42 +56,100 @@ background:#1a5dc9;
 <body>
 
 <div class="form-box">
+    <h2 id="form-title">طلب عملية جراحية</h2>
+    <div id="success-msg" style="display:none;background:#d4edda;color:#155724;padding:10px;border-radius:6px;margin-bottom:15px;text-align:center;">
+        ✅ تم إرسال طلبك بنجاح! سنقوم بمراجعته والرد عليك قريباً.
+    </div>
+    
+    <div id="req-form">
+        <label>الاسم الكامل</label>
+        <input type="text" id="p-name" required placeholder="محمد علي">
 
-<h2>طلب عملية جراحية</h2>
+        <label>البريد الإلكتروني (لاستقبال رسالة التأكيد)</label>
+        <input type="email" id="p-email" required placeholder="name@example.com">
 
-@if(session('success'))
-<div style="background:#d4edda;color:#155724;padding:10px;border-radius:6px;margin-bottom:15px;text-align:center;">
-{{ session('success') }}
+        <label>رقم الهاتف (اختياري)</label>
+        <input type="tel" id="p-phone" placeholder="0555 00 00 00">
+
+        <label>نوع العملية</label>
+        <input type="text" id="p-type" required placeholder="مثال: جراحة المرارة">
+
+        <label>وصف الحالة</label>
+        <textarea id="p-desc" required placeholder="تفاصيل إضافية..."></textarea>
+
+        <label>التاريخ المفضل</label>
+        <input type="date" id="p-date" required>
+
+        <button type="button" id="btn-submit">إرسال الطلب</button>
+    </div>
+    <div style="text-align:center;margin-top:15px;">
+        <a href="/" style="font-size:12px;color:#2c7be5;text-decoration:none;">العودة للرئيسية</a>
+    </div>
 </div>
-@endif
 
-<form action="/demands" method="POST">
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, push, set, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-@csrf
+const firebaseConfig = {
+  apiKey: "AIzaSyC5OtqME0D8t72QsEERdRXrCCKl0bZqEQk",
+  authDomain: "test-ae989.firebaseapp.com",
+  databaseURL: "https://test-ae989-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "test-ae989",
+  storageBucket: "test-ae989.firebasestorage.app",
+  messagingSenderId: "1083766099812",
+  appId: "1:1083766099812:web:a6a0170fc323d579aff471"
+};
 
-<label>الاسم الكامل</label>
-<input type="text" name="name" required>
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-<label>البريد الإلكتروني (لاستقبال رسالة التأكيد)</label>
-<input type="email" name="patient_email" required>
+document.getElementById('btn-submit').addEventListener('click', async function() {
+    const name = document.getElementById('p-name').value;
+    const email = document.getElementById('p-email').value;
+    const phone = document.getElementById('p-phone').value;
+    const type = document.getElementById('p-type').value;
+    const desc = document.getElementById('p-desc').value;
+    const date = document.getElementById('p-date').value;
 
-<label>رقم الهاتف (اختياري)</label>
-<input type="tel" name="patient_phone">
+    if(!name || !email || !type || !date) {
+        alert('الرجاء ملء جميع الحقول الإلزامية.');
+        return;
+    }
 
-<label>نوع العملية</label>
-<input type="text" name="type" required>
+    const btn = this;
+    btn.disabled = true;
+    btn.innerText = 'جاري الإرسال...';
 
-<label>وصف الحالة</label>
-<textarea name="description" required></textarea>
+    try {
+        const newRef = push(ref(db, 'appointments/requests'));
+        const parts = name.split(' ');
+        const fname = parts[0];
+        const lname = parts.slice(1).join(' ') || '—';
 
-<label>التاريخ</label>
-<input type="date" name="date" required>
+        await set(newRef, {
+            fname: fname,
+            lname: lname,
+            email: email,
+            phone: phone,
+            department: type,
+            description: desc,
+            date: date,
+            status: 'Pending',
+            createdAt: serverTimestamp()
+        });
 
-<button type="submit">إرسال الطلب</button>
-
-</form>
-
-</div>
+        document.getElementById('req-form').style.display = 'none';
+        document.getElementById('form-title').style.display = 'none';
+        document.getElementById('success-msg').style.display = 'block';
+    } catch (e) {
+        console.error(e);
+        alert('حدث خطأ أثناء الإرسال. يرجى المحاولة لاحقاً.');
+    }
+    btn.disabled = false;
+    btn.innerText = 'إرسال الطلب';
+});
+</script>
 
 </body>
 </html>

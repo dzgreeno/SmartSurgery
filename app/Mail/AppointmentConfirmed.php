@@ -19,7 +19,7 @@ class AppointmentConfirmed extends Mailable
      *
      * @return void
      */
-    public function __construct(Demand $demand)
+    public function __construct($demand)
     {
         $this->demand = $demand;
     }

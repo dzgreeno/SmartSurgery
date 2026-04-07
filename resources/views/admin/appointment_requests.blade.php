@@ -14,6 +14,8 @@
   --sidebar: 240px; --topbar:  56px; --r:       8px;
   --t:       .18s cubic-bezier(.4,0,.2,1);
 }
+[dir="rtl"] { direction: rtl; }
+[dir="ltr"] { direction: ltr; }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text)}
 
@@ -106,7 +108,7 @@ tr:hover { background: rgba(255,255,255,.02); }
             <th>تاريخ الطلب</th>
             <th>الاسم واللقب</th>
             <th>رقم الهاتف</th>
-            <th>القسم المطلوب</th>
+            <th>البريد الإلكتروني</th>
             <th>التاريخ المفضل</th>
             <th>الحالة</th>
             <th>الإجراءات</th>
@@ -168,6 +170,7 @@ onValue(ref(db, 'appointments/requests'), (snapshot) => {
       <td style="font-weight:700;">${req.fname} ${req.lname}</td>
       <td dir="ltr" style="text-align:right;">${req.phone}</td>
       <td style="color:var(--accent);">${req.department}</td>
+      <td style="font-size:11px;color:var(--muted);">${req.email || '—'}</td>
       <td>${req.date}</td>
       <td><span class="badge badge-pending">قيد الانتظار</span></td>
       <td>
@@ -180,30 +183,48 @@ onValue(ref(db, 'appointments/requests'), (snapshot) => {
 });
 
 window.confirmAppt = async (id) => {
-  if(!confirm('هل أنت متأكد من تأكيد هذا الموعد وإرساله للقسم المختص؟')) return;
-  const time = prompt("يرجى تحديد وقت حضور المريض (مثال: 09:30 صباحاً):", "08:00");
-  if(!time) return; // User cancelled prompt
+  if(!confirm('هل أنت متأكد من تأكيد هذا الموعد وإرساله للقسم المختص؟ سيرسل النظام إيميل تلقائي للمريض.')) return;
+  
+  const rRef = ref(db, `appointments/requests/${id}`);
+  const snap = await get(rRef);
+  if(!snap.exists()) { alert('الطلب غير موجود.'); return; }
+  const data = snap.val();
+
+  const cDate = prompt("تأكيد التاريخ (السنة-الشهر-اليوم):", data.date || "");
+  const cTime = prompt("تحديد وقت الحضور (مثال: 09:30):", "09:00");
+  
+  if(!cDate || !cTime) return;
 
   try {
-    const rRef = ref(db, `appointments/requests/${id}`);
-    const snapshot = await get(rRef);
-    
-    if(snapshot.exists()) {
-      const data = snapshot.val();
-      data.status = 'Confirmed';
-      data.exactTime = time;
-      
-      // Move to Confirmed
-      await set(ref(db, `appointments/confirmed/${id}`), data);
-      // Remove from requests
-      await remove(rRef);
-      alert('تم التأكيد بنجاح ونقل الموعد إلى الجدول.');
+    const response = await fetch('/admin/demands/confirm-firebase', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        id: id,
+        fname: data.fname,
+        lname: data.lname,
+        email: data.email,
+        phone: data.phone,
+        department: data.department,
+        confirmed_date: cDate,
+        confirmed_time: cTime
+      })
+    });
+
+    const result = await response.json();
+    if(result.success) {
+      alert('✅ ' + result.message);
+      // Data in Firebase is already updated by the PHP controller in my design
     } else {
-        alert('حدث خطأ: لم يتم العثور على الطلب.');
+      alert('❌ فشل التأكيد: ' + result.message);
     }
   } catch (e) {
     console.error(e);
-    alert('حدث خطأ أثناء التأكيد. المرجو التحقق من الرصيد أو الصلاحيات.');
+    alert('حدث خطأ في الاتصال بالخادم.');
   }
 };
 

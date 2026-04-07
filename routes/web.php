@@ -98,7 +98,6 @@ Route::get('/system-seed-db', function (App\Services\FirebaseService $firebase) 
 
 // طلبات العمليات (متاح للعامة)
 Route::view('/demande', 'demande')->name('demande');
-Route::post('/demands', [DemandController::class, 'store']);
 
 /*
 |--------------------------------------------------------------------------
@@ -172,17 +171,12 @@ Route::middleware(['firebase'])->group(function () {
             return view('admin.surgeries');
         })->name('admin.surgeries');
 
-        // طلبات العمليات القديمة (نظام قديم)
+        // طلبات العمليات (نظام Firebase)
         Route::get('/admin/demands', function () {
-            try {
-                $demands = \App\Models\Demand::orderBy('created_at', 'desc')->get();
-            } catch (\Exception $e) {
-                $demands = collect([]);
-            }
-            return view('admin.demands', compact('demands'));
+            return view('admin.demands');
         })->name('admin.demands');
 
-        Route::post('/admin/demands/{id}/status', [DemandController::class, 'updateStatus'])->name('admin.demands.status');
+        Route::post('/admin/demands/confirm-firebase', [DemandController::class, 'confirmFirebaseAppt'])->name('admin.confirm_firebase');
         Route::post('/admin/demands/{id}/confirm', [DemandController::class, 'confirmAppointment'])->name('admin.demands.confirm');
 
         // جدول المناوبة الطبية للمختصين (يديرها المدير فقط)

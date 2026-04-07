@@ -7,100 +7,73 @@ use Illuminate\Http\Request;
 use App\Services\GoogleCalendarService;
 use App\Mail\AppointmentConfirmed;
 use Illuminate\Support\Facades\Mail;
+use App\Services\FirebaseService;
 use Exception;
 
 class DemandController extends Controller
 {
-    public function store(Request $request)
+    /**
+     * Confirm a Firebase Appointment (Email + Google Calendar + Firebase update)
+     */
+    public function confirmFirebaseAppt(Request $request, GoogleCalendarService $calendarService, FirebaseService $firebaseService)
     {
-        $request->validate([
-            'name' => 'nullable|string|max:255',
-            'fname' => 'nullable|string|max:255',
-            'lname' => 'nullable|string|max:255',
-            'patient_email' => 'required|email|max:255',
-            'patient_phone' => 'nullable|string|max:20',
-            'type' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'date' => 'required|date',
-        ]);
+        $id = $request->id;
+        $db = $firebaseService->getDatabase();
+        
+        // Mock a demand object for Mail/Calendar
+        $demand = new \stdClass();
+        $demand->patient_name = $request->fname . ' ' . $request->lname;
+        $demand->patient_email = $request->email;
+        $demand->patient_phone = $request->phone;
+        $demand->surgery_type = $request->department;
+        $demand->confirmed_date = $request->confirmed_date;
+        $demand->confirmed_time = $request->confirmed_time;
 
-        $fullName = $request->name ?: trim($request->fname . ' ' . $request->lname);
-        $description = $request->description ?: 'طلب موعد عبر الموقع الرسمي';
-
-        Demand::create([
-            'patient_name' => $fullName,
-            'patient_email' => $request->patient_email,
-            'patient_phone' => $request->patient_phone,
-            'surgery_type' => $request->type,
-            'description' => $description,
-            'requested_date' => $request->date,
-            'status' => 'pending',
-            'email_status' => 'not_sent',
-        ]);
-
-        if ($request->ajax() || $request->wantsJson()) {
-            return response()->json(['success' => true, 'message' => 'تم إرسال طلبك بنجاح. سيتم مراجعته من قبل الإدارة.']);
+        // 1. Google Calendar
+        try {
+            $eventId = $calendarService->createAppointmentEvent($demand);
+            $demand->calendar_event_id = $eventId;
+        } catch (Exception $e) {
+            \Log::error("Google Calendar Error: " . $e->getMessage());
         }
 
-        return back()->with('success', 'تم إرسال طلبك بنجاح. سيتم مراجعته من قبل الإدارة.');
+        // 2. Send Email
+        if (!empty($demand->patient_email)) {
+            try {
+                Mail::to($demand->patient_email)->send(new AppointmentConfirmed($demand));
+            } catch (Exception $e) {
+                \Log::error("Email Error: " . $e->getMessage());
+            }
+        }
+
+        // 3. Update Firebase (Move from requests to confirmed)
+        try {
+            $refPath = "appointments/requests/{$id}";
+            $confirmedPath = "appointments/confirmed/{$id}";
+            
+            $data = (array) $demand;
+            $data['status'] = 'Confirmed';
+            $data['exactTime'] = $request->confirmed_time;
+            $data['updatedAt'] = ['.sv' => 'timestamp'];
+
+            $db->getReference($confirmedPath)->set($data);
+            $db->getReference($refPath)->remove();
+        } catch (Exception $e) {
+            return response()->json(['success' => false, 'message' => 'حدث خطأ أثناء تحديث Firebase: ' . $e->getMessage()]);
+        }
+
+        return response()->json(['success' => true, 'message' => 'تم تأكيد الموعد وإرسال الإشعارات بنجاح.']);
+    }
+
+    public function store(Request $request)
+    {
+        // DISABLED SQL Store to fix Vercel 500 error
+        return response()->json(['error' => 'Please use Firebase directly for submissions.'], 400);
     }
 
     public function index()
     {
-        $demands = Demand::latest()->get();
-        return view('admin.demands', compact('demands'));
-    }
-
-    public function updateStatus(Request $request, $id)
-    {
-        $demand = Demand::findOrFail($id);
-        $demand->update([
-            'status' => $request->status,
-            'admin_notes' => $request->admin_notes,
-        ]);
-
-        return back()->with('success', 'تم تحديث حالة الطلب بنجاح.');
-    }
-
-    public function confirmAppointment(Request $request, $id, GoogleCalendarService $calendarService)
-    {
-        $request->validate([
-            'confirmed_date' => 'required|date',
-            'confirmed_time' => 'required',
-        ]);
-
-        $demand = Demand::findOrFail($id);
-        
-        $demand->update([
-            'status' => 'scheduled',
-            'confirmed_date' => $request->confirmed_date,
-            'confirmed_time' => $request->confirmed_time,
-        ]);
-
-        // Add to Google Calendar
-        try {
-            $eventId = $calendarService->createAppointmentEvent($demand);
-            $demand->update(['calendar_event_id' => $eventId]);
-        } catch (Exception $e) {
-            // Logs Calendar error but we keep it scheduled
-            \Log::error("Google Calendar Error: " . $e->getMessage());
-        }
-
-        // Send Email
-        if ($demand->patient_email) {
-            try {
-                Mail::to($demand->patient_email)->send(new AppointmentConfirmed($demand));
-                $demand->update(['email_status' => 'sent', 'email_fail_reason' => null]);
-            } catch (Exception $e) {
-                // Keep the appointment confirmed if email fails, but record error
-                \Log::error("Email Error: " . $e->getMessage());
-                $demand->update([
-                    'email_status' => 'failed',
-                    'email_fail_reason' => mb_substr($e->getMessage(), 0, 500)
-                ]);
-            }
-        }
-
-        return back()->with('success', 'تم تأكيد الموعد وتحديث الأحداث بنجاح.');
+        // SQL demand disabled
+        return view('admin.demands', ['demands' => collect([])]);
     }
 }

@@ -8,6 +8,7 @@ class FirebaseService
 {
     protected $factory;
     protected $auth;
+    protected $database;
     protected $firestore;
 
     public function __construct()
@@ -87,5 +88,18 @@ class FirebaseService
         }
 
         return $this->firestore;
+    }
+
+    public function getDatabase()
+    {
+        if (!$this->database && $this->factory) {
+            $this->database = $this->factory->createDatabase();
+        }
+
+        if (!$this->database) {
+            throw new \RuntimeException('Firebase Realtime Database not available. Check credentials file.');
+        }
+
+        return $this->database;
     }
 }

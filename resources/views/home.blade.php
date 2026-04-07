@@ -1065,37 +1065,25 @@ document.getElementById('btn-submit-booking').addEventListener('click', async fu
     btn.disabled = true;
 
     try {
-      // Send to Laravel Backend instead of Firebase
-      const formData = new FormData();
-      formData.append('fname', document.getElementById('fname').value);
-      formData.append('lname', document.getElementById('lname').value);
-      formData.append('patient_phone', document.getElementById('fphone').value);
-      formData.append('patient_email', document.getElementById('femail').value);
-      formData.append('type', document.getElementById('fspec').value);
-      formData.append('date', document.getElementById('fdate').value);
-      formData.append('_token', '{{ csrf_token() }}');
-
-      const response = await fetch('/demands', {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'X-Requested-With': 'XMLHttpRequest'
-        }
+      // Reverting to Firebase Realtime Database as requested
+      const newReqRef = push(ref(db, 'appointments/requests'));
+      await set(newReqRef, {
+        fname: document.getElementById('fname').value,
+        lname: document.getElementById('lname').value,
+        phone: document.getElementById('fphone').value,
+        email: document.getElementById('femail').value, // Adding the requested email field
+        department: document.getElementById('fspec').value,
+        date: document.getElementById('fdate').value,
+        status: "Pending",
+        createdAt: serverTimestamp()
       });
-
-      const result = await response.json();
-
-      if (result.success) {
-        alert('✅ ' + result.message);
-        fields.forEach(inp => inp.value = '');
-        captchaInput.value = '';
-        generateCaptcha();
-      } else {
-        alert('❌ فشل إرسال الطلب: ' + (result.message || 'خطأ غير معروف'));
-      }
+      alert('✅ تم استلام طلب الحجز بنجاح وحفظه في الموقع! وسيتواصل فريقنا معك قريبًا.');
+      fields.forEach(inp => inp.value = '');
+      captchaInput.value = '';
+      generateCaptcha();
     } catch (err) {
       console.error(err);
-      alert('❌ حدث خطأ أثناء الاتصال بالخادم!');
+      alert('❌ حدث خطأ أثناء إرسال الطلب إلى Firebase!');
     }
     btn.innerHTML = oldTxt;
     btn.disabled = false;
